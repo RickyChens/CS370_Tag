@@ -35,26 +35,40 @@ while running:
     dy = 0
 
     if keys[pygame.K_LEFT]:
-        dx = -1
+        dx = -10
     if keys[pygame.K_RIGHT]:
-        dx = 1
+        dx = 10
     if keys[pygame.K_UP]:
-        dy = -1
+        dy = -10
     if keys[pygame.K_DOWN]:
-        dy = 1
+        dy = 10
 
     new_rect = player.rect.move(dx, dy)
 
     if not new_rect.colliderect(obstacle.rect):
         player.rect = new_rect
     else:
+        nx = 0
+        ny = 0
+        if dx > 0:
+            nx = 50 - (obstacle.rect.x - player.rect.x)
+        elif dx < 0:
+            nx = 50 - (player.rect.x - obstacle.rect.x)
+        elif dy > 0:
+            ny = 50 - (obstacle.rect.y - player.rect.y)
+        elif dy < 0:
+            ny = 50 - (player.rect.y - obstacle.rect.y)
+        player.rect.x += nx
+        player.rect.y += ny
         print("Collision")
+
+    # Keeps player within window boundaries
     player.rect.clamp_ip(screen_boundaries)
 
     screen.fill(BLACK)
     screen.blit(player.image, player.rect)
     screen.blit(obstacle.image, obstacle.rect)
     pygame.display.flip()
-    clock.tick(500)
+    clock.tick(10)
 
 pygame.quit()
