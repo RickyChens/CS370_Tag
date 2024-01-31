@@ -38,7 +38,7 @@ class Obstacle(pygame.sprite.Sprite):
 
         self.has_collided = False  # Flag to check if collision has occurred
 
-    def update(self):
+    def update(self, player):
         # Check if the obstacle is colliding with the player's hitbox
         if player.hitbox.colliderect(self.rect) and not self.has_collided:
             print("Collision")
@@ -75,7 +75,7 @@ while running:
     # Update hitbox position to match the player's position
     player.hitbox.topleft = (new_rect.x - 25, new_rect.y - 25)
 
-    obstacle.update()
+    obstacle.update(player)
     if not new_rect.colliderect(obstacle.rect):
         player.rect = new_rect
     else:
