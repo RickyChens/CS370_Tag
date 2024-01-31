@@ -27,7 +27,6 @@ class Player(pygame.sprite.Sprite):
         # Update the hitbox position to match the player's position
         self.hitbox.topleft = (self.rect.x - 25, self.rect.y - 25)
 
-
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height):
         super().__init__()
@@ -44,6 +43,8 @@ class Obstacle(pygame.sprite.Sprite):
             print("Collision")
             collision_sound.play()
             self.has_collided = True  # Set the flag to True to avoid repeated collisions
+        elif not player.hitbox.colliderect(self.rect):
+            self.has_collided = False  # Reset the collision flag if not colliding
 
 player = Player(250, 250, 25, 25)
 obstacle = Obstacle(100, 100, 25, 25)
@@ -71,15 +72,11 @@ while running:
         dy = 1
 
     new_rect = player.rect.move(dx, dy)
-
-    # Update hitbox position to match the player's position
     player.hitbox.topleft = (new_rect.x - 25, new_rect.y - 25)
 
     obstacle.update(player)
     if not new_rect.colliderect(obstacle.rect):
         player.rect = new_rect
-    else:
-        obstacle.has_collided = False  # Reset the collision flag if not colliding
 
     player.rect.clamp_ip(screen_boundaries)
 

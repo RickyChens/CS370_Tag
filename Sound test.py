@@ -22,7 +22,7 @@ def main():
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # Replace 'click_sound.wav' with the path to your sound file
-                play_sound("sound.wav")
+                play_sound("soundwhoosh.wav")
 
         pygame.display.flip()
         clock.tick(60)
