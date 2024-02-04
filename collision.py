@@ -1,5 +1,6 @@
 import random
 import pygame
+import time
 from constants import *
 
 pygame.init()
@@ -17,6 +18,29 @@ class Player(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect(center=pos)
 
+    def move(self, dx, dy):
+        # Move each axis separately. Note that this checks for collisions both times.
+        if dx != 0:
+            self.move_single_axis(dx, 0)
+        if dy != 0:
+            self.move_single_axis(0, dy)
+
+    def move_single_axis(self, dx, dy):
+
+        # Move the rect
+        self.rect.x += dx
+        self.rect.y += dy
+
+        if self.rect.colliderect(obstacle.rect):
+            if dx > 0:
+                self.rect.right = obstacle.rect.left
+            if dx < 0:
+                self.rect.left = obstacle.rect.right
+            if dy > 0:
+                self.rect.bottom = obstacle.rect.top
+            if dy < 0:
+                self.rect.top = obstacle.rect.bottom
+
 
 player = Player((250, 250), WHITE)
 obstacle = Player((random.randint(50, 750), random.randint(50, 750)), RED)
@@ -31,36 +55,14 @@ while running:
 
     keys = pygame.key.get_pressed()
 
-    dx = 0
-    dy = 0
-
     if keys[pygame.K_LEFT]:
-        dx = -10
+        player.move(-2, 0)
     if keys[pygame.K_RIGHT]:
-        dx = 10
+        player.move(2, 0)
     if keys[pygame.K_UP]:
-        dy = -10
+        player.move(0, -2)
     if keys[pygame.K_DOWN]:
-        dy = 10
-
-    new_rect = player.rect.move(dx, dy)
-
-    if not new_rect.colliderect(obstacle.rect):
-        player.rect = new_rect
-    else:
-        nx = 0
-        ny = 0
-        if dx > 0:
-            nx = 50 - (obstacle.rect.x - player.rect.x)
-        elif dx < 0:
-            nx = 50 - (player.rect.x - obstacle.rect.x)
-        elif dy > 0:
-            ny = 50 - (obstacle.rect.y - player.rect.y)
-        elif dy < 0:
-            ny = 50 - (player.rect.y - obstacle.rect.y)
-        player.rect.x += nx
-        player.rect.y += ny
-        print("Collision")
+        player.move(0, 2)
 
     # Keeps player within window boundaries
     player.rect.clamp_ip(screen_boundaries)
@@ -69,6 +71,6 @@ while running:
     screen.blit(player.image, player.rect)
     screen.blit(obstacle.image, obstacle.rect)
     pygame.display.flip()
-    clock.tick(10)
+    clock.tick(60)
 
 pygame.quit()
