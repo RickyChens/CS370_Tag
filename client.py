@@ -10,7 +10,7 @@ import socket
 import json
 
 # Client settings
-SERVER_IP = '127.0.0.1'  # The server's IP address
+SERVER_IP = '192.168.229.187'  # The server's IP address
 SERVER_PORT = 5555
 BUFFER_SIZE = 1024
 
