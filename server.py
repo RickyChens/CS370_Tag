@@ -4,12 +4,13 @@
 
 
 # server.py
+
 import pygame
 import socket
 import json
 
 # Server settings
-SERVER_IP = '127.0.0.1'  # Localhost (change to your server IP if needed)
+SERVER_IP = '192.168.229.187'  # Localhost (change to your server IP if needed)
 SERVER_PORT = 5555
 BUFFER_SIZE = 1024
 
