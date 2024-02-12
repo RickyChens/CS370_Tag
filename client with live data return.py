@@ -1,66 +1,94 @@
+import random
 import pygame
 import socket
 import json
+
+
 from constants import *
 
-# Client settings
-SERVER_IP = '192.168.229.187'  # The server's IP address
-SERVER_PORT = 5555
-BUFFER_SIZE = 1024
-
-# Initialize client socket
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect((SERVER_IP, SERVER_PORT))
-
-def send_data(data):
-    client_socket.send(json.dumps(data).encode())
-
 pygame.init()
+
+server_ip = input("Enter server IP: ")
+server_port = int(input("Enter server port: "))
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket.connect((server_ip, server_port))
+
+
 screen = pygame.display.set_mode((HEIGHT, WIDTH))
 screen_boundaries = pygame.Rect((0, 0), (HEIGHT, WIDTH))
 
-# Initialize the mixer module
-pygame.mixer.init()
 
-# Load the sound file
-collision_sound = pygame.mixer.Sound("sound.wav")
+mapping = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+           [1, 0, 1, 0, 1, 1, 1, 0, 0, 1],
+           [1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
+           [1, 1, 1, 0, 1, 1, 0, 0, 0, 1],
+           [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+           [1, 1, 1, 1, 1, 0, 0, 0, 1, 1],
+           [1, 0, 0, 0, 1, 1, 1, 0, 0, 1],
+           [1, 0, 1, 0, 1, 0, 0, 0, 1, 1],
+           [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height):
+    def __init__(self, pos, color):
         super().__init__()
-        self.image = pygame.Surface((width, height))
-        self.image.fill(RED)
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
 
-        # Adjust hitbox dimensions and color
-        self.hitbox = pygame.Rect(x - 25, y - 25, width + 50, height + 50)
-        self.hitbox_color = WHITE  # New line to set hitbox color
+        self.image = pygame.Surface([50, 50])
+        self.image.fill(color)
+        self.image.set_colorkey((255, 100, 98))
 
-    def update(self):
-        # Update the hitbox position to match the player's position
-        self.hitbox.topleft = (self.rect.x - 25, self.rect.y - 25)
+        self.rect = self.image.get_rect(center=pos)
+
+    def send_location(self):
+        # Serialize player location and send to server
+        data = json.dumps({'x': self.rect.x, 'y': self.rect.y})
+        client_socket.sendall(data.encode())
+
+    def move(self, dx, dy):
+        if dx != 0 or dy != 0:
+            self.move_single_axis(dx, dy)
+            self.send_location()  # Call this after moving
+
+    def move(self, dx, dy):
+        if dx != 0 or dy != 0:
+            self.move_single_axis(dx, dy)
+            self.send_location()  # Call this after moving
+
+    def move_single_axis(self, dx, dy):
+        # Move the rect
+        self.rect.x += dx
+        self.rect.y += dy
+
+        for r in range(len(mapping)):
+            for c in range(len(mapping[r])):
+                if mapping[r][c] == 1:
+                    obstacle_rect = pygame.Rect(c * (WIDTH // len(mapping[r])),
+                                                r * (HEIGHT // len(mapping)),
+                                                WIDTH // len(mapping[r]),
+                                                HEIGHT // len(mapping))
+
+                    if self.rect.colliderect(obstacle_rect):
+                        if dx > 0:
+                            self.rect.right = obstacle_rect.left
+                        if dx < 0:
+                            self.rect.left = obstacle_rect.right
+                        if dy > 0:
+                            self.rect.bottom = obstacle_rect.top
+                        if dy < 0:
+                            self.rect.top = obstacle_rect.bottom;
 
 
-class Obstacle(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height):
-        super().__init__()
-        self.image = pygame.Surface((width, height))
-        self.image.fill(WHITE)
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
+player = Player((350, 350), WHITE)
 
-        self.has_collided = False  # Flag to check if collision has occurred
-
-    def update(self):
-        # Check if the obstacle is colliding with the player's hitbox
-        if player.hitbox.colliderect(self.rect) and not self.has_collided:
-            print("Collision")
-            collision_sound.play()
-            self.has_collided = True  # Set the flag to True to avoid repeated collisions
-
-player = Player(250, 250, 25, 25)
-obstacle = Obstacle(100, 100, 25, 25)
+obstacles = []
+for r in range(len(mapping)):
+    for c in range(len(mapping[r])):
+        if mapping[r][c] == 1:
+            obstacle = Player((c * (WIDTH // len(mapping[r])) + WIDTH // (2 * len(mapping[r])),
+                               r * (HEIGHT // len(mapping)) + HEIGHT // (2 * len(mapping))),
+                              RED)
+            obstacles.append(obstacle)
 
 clock = pygame.time.Clock()
 
@@ -72,42 +100,34 @@ while running:
 
     keys = pygame.key.get_pressed()
 
-    dx = 0
-    dy = 0
-
     if keys[pygame.K_LEFT]:
-        dx = -1
+        player.move(-2, 0)
     if keys[pygame.K_RIGHT]:
-        dx = 1
+        player.move(2, 0)
     if keys[pygame.K_UP]:
-        dy = -1
+        player.move(0, -2)
     if keys[pygame.K_DOWN]:
-        dy = 1
+        player.move(0, 2)
 
-    new_rect = player.rect.move(dx, dy)
-
-    # Update hitbox position to match the player's position
-    player.hitbox.topleft = (new_rect.x - 25, new_rect.y - 25)
-
-    obstacle.update()
-    if not new_rect.colliderect(obstacle.rect):
-        player.rect = new_rect
-    else:
-        obstacle.has_collided = False  # Reset the collision flag if not colliding
-
+    # Keeps player within window boundaries
     player.rect.clamp_ip(screen_boundaries)
 
     screen.fill(BLACK)
+    for r in range(len(mapping)):
+        for c in range(len(mapping[r])):
+            if mapping[r][c] == 1:
+                rect_x = c * (WIDTH // len(mapping[r]))
+                rect_y = r * (HEIGHT // len(mapping))
+                rect_width = WIDTH // len(mapping[r])
+                rect_height = HEIGHT // len(mapping)
+                pygame.draw.rect(screen, RED, pygame.Rect(rect_x, rect_y, rect_width, rect_height), 2)
 
-    # Draw player hitbox
-    pygame.draw.rect(screen, player.hitbox_color, player.hitbox, 2)
+    for obstacle in obstacles:
+        screen.blit(obstacle.image, obstacle.rect)
 
     screen.blit(player.image, player.rect)
-    screen.blit(obstacle.image, obstacle.rect)
     pygame.display.flip()
-    clock.tick(500)
+    clock.tick(60)
 
-    player_data = {'x': 100, 'y': 200}  # Replace with actual player position
-    send_data(player_data)
-
+client_socket.close()
 pygame.quit()
