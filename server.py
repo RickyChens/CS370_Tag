@@ -3,7 +3,7 @@ import threading
 import json
 
 # Server settings
-SERVER_IP = '192.168.229.187'  # Listen on all network interfaces
+SERVER_IP = '192.168.230.232'  # Listen on all network interfaces
 SERVER_PORT = 5555
 BUFFER_SIZE = 1024
 
