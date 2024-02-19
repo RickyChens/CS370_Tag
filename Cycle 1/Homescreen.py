@@ -3,6 +3,7 @@ import sys
 from constants import *
 from button import Button
 from collision import Player, Obstacle
+
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 screen_boundaries = pygame.Rect((0, 0), (WIDTH, HEIGHT))
@@ -23,7 +24,11 @@ def play():
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
 
         keys = pygame.key.get_pressed()
 
