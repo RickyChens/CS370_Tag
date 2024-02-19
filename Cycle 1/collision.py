@@ -12,7 +12,7 @@ class Player(pygame.sprite.Sprite):
 
         self.image = pygame.image.load("soldier.png").convert_alpha()
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect(center=pos)
 
     def move(self, dx, dy, obstacle, player_group):
         if dx != 0 or dy != 0:
@@ -44,7 +44,7 @@ class Obstacle(pygame.sprite.Sprite):
 
 
 def main():
-    player = Player((350, 350))
+    player = Player((500, 500))
     obstacle = Obstacle((300, 300), RED)
 
     player_group = pygame.sprite.Group()
