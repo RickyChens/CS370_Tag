@@ -11,6 +11,7 @@ pygame.mixer.init()
 # Load the sound file
 collision_sound = pygame.mixer.Sound("sound.wav")
 
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height):
         super().__init__()
@@ -26,6 +27,29 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         # Update the hitbox position to match the player's position
         self.hitbox.topleft = (self.rect.x - 25, self.rect.y - 25)
+
+    def move(self, dx, dy):
+        # Move each axis separately. Note that this checks for collisions both times.
+        if dx != 0:
+            self.move_single_axis(dx, 0)
+        if dy != 0:
+            self.move_single_axis(0, dy)
+
+    def move_single_axis(self, dx, dy):
+
+        # Move the rect
+        self.rect.x += dx
+        self.rect.y += dy
+
+        if self.rect.colliderect(obstacle.rect):
+            if dx > 0:
+                self.rect.right = obstacle.rect.left
+            if dx < 0:
+                self.rect.left = obstacle.rect.right
+            if dy > 0:
+                self.rect.bottom = obstacle.rect.top
+            if dy < 0:
+                self.rect.top = obstacle.rect.bottom
 
 
 class Obstacle(pygame.sprite.Sprite):
@@ -44,6 +68,8 @@ class Obstacle(pygame.sprite.Sprite):
             print("Collision")
             collision_sound.play()
             self.has_collided = True  # Set the flag to True to avoid repeated collisions
+        elif not player.hitbox.colliderect(self.rect):
+            self.has_collided = False  # Reset the collision flag if not colliding
 
 player = Player(250, 250, 25, 25)
 obstacle = Obstacle(100, 100, 25, 25)
@@ -58,31 +84,18 @@ while running:
 
     keys = pygame.key.get_pressed()
 
-    dx = 0
-    dy = 0
-
     if keys[pygame.K_LEFT]:
-        dx = -1
+        player.move(-2, 0)
     if keys[pygame.K_RIGHT]:
-        dx = 1
+        player.move(2, 0)
     if keys[pygame.K_UP]:
-        dy = -1
+        player.move(0, -2)
     if keys[pygame.K_DOWN]:
-        dy = 1
+        player.move(0, 2)
 
-    new_rect = player.rect.move(dx, dy)
-
-    # Update hitbox position to match the player's position
-    player.hitbox.topleft = (new_rect.x - 25, new_rect.y - 25)
-
-    obstacle.update(player)
-    if not new_rect.colliderect(obstacle.rect):
-        player.rect = new_rect
-    else:
-        obstacle.has_collided = False  # Reset the collision flag if not colliding
-
+    player.hitbox.topleft = (player.rect.x - 25, player.rect.y - 25)
     player.rect.clamp_ip(screen_boundaries)
-
+    obstacle.update(player)
     screen.fill(BLACK)
 
     # Draw player hitbox
