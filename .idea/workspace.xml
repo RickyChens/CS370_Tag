@@ -16,6 +16,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_2_7_24__1_43_PM__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_2_7_24__1_43_PM__Changes_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2_14_24__12_38_PM__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_2_14_24__12_38_PM__Changes_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/visualcone.py" beforeDir="false" afterPath="$PROJECT_DIR$/visualcone.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,6 +57,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.Collison test with hitbox.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.raycasting.executor&quot;: &quot;Run&quot;,
+    &quot;Python.raycasting.v2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.visualcone.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Raycasting&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/ricky/Desktop/CS370/Tag_CS370&quot;
+  }
+}</component>
+  <component name="RunManager">
+    <configuration name="Collison test with hitbox" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Python.Collison test with hitbox.executor": "Debug",
@@ -221,13 +238,17 @@
         <item itemvalue="Python.server" />
         <item itemvalue="Python.map creation" />
         <item itemvalue="Python.flashlight" />
+        <item itemvalue="Python.Sound test" />
+        <item itemvalue="Python.server" />
+        <item itemvalue="Python.Collison test with hitbox" />
+        <item itemvalue="Python.client" />
       </list>
     </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-50da183f06c8-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.13135.95" />
+        <option value="bundled-python-sdk-5a2391486177-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.13763.11" />
       </set>
     </attachedChunks>
   </component>
