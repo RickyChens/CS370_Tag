@@ -4,6 +4,7 @@ from constants import *
 
 pygame.init()
 screen = pygame.display.set_mode((HEIGHT, WIDTH))
+screen_boundaries = pygame.Rect((0, 0), (HEIGHT, WIDTH))
 
 CELL_SIZE = 60  # Adjust cell size
 PLAYER_SIZE = 20  # Adjust player size
@@ -32,7 +33,7 @@ def generate_random_map():
     # Introduce more randomness by breaking some walls
     for i in range(15):
         for j in range(15):
-            if random.random() < 0.2:  # Adjust probability for openness
+            if random.random() < 0.6:  # Adjust probability for openness
                 map_grid[i][j] = 0
 
     # Check for dead ends and convert them into corridors
@@ -73,7 +74,7 @@ for r in range(len(mapping)):
 
 # Generate player position not inside walls
 player_position = None
-while player_position is None or mapping[player_position[1] // CELL_SIZE][player_position[0] // CELL_SIZE] == 1:
+while player_position is None or (mapping[player_position[1] // CELL_SIZE][player_position[0] // CELL_SIZE] == 1) or (mapping[round(float(player_position[1])/CELL_SIZE)][round(float(player_position[0])/CELL_SIZE)] == 1) or (mapping[player_position[1] // CELL_SIZE][player_position[0] // CELL_SIZE] == 1):
     player_position = (random.randint(0, 14) * CELL_SIZE, random.randint(0, 14) * CELL_SIZE)
 
 player = Player(player_position, WHITE)
@@ -105,6 +106,7 @@ while running:
     for obstacle in obstacles:
         pygame.draw.rect(screen, RED, obstacle)
 
+    player.rect.clamp_ip(screen_boundaries)
     screen.blit(player.image, player.rect)
     pygame.display.flip()
     clock.tick(60)
