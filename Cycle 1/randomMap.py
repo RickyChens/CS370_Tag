@@ -76,7 +76,7 @@ class Player(pygame.sprite.Sprite):
         # Move the player if no collision occurs
         self.rect.move_ip(dx, dy)
 
-
+'''
 obstacles = []
 mapping = generate_random_map()
 for r in range(len(mapping)):
@@ -127,3 +127,4 @@ while running:
     clock.tick(60)
 
 pygame.quit()
+'''
