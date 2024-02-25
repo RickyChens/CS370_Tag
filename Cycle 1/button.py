@@ -1,12 +1,3 @@
-'''
-pygame.init()
-screen = pygame.display.set_mode((800, 800))
-main_font = pygame.font.SysFont("cambria", 50)
-'''
-import pygame
-import sys
-
-
 class Button:
     def __init__(self, image, pos, text_input, font):
         self.image = image
@@ -22,21 +13,3 @@ class Button:
     def checkInput(self, position):
         if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
             return True
-
-
-'''
-button = Button(pygame.Surface([200, 80]), (250, 250), "Button")
-
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        if event.type == pygame.MOUSEBUTTONUP:
-            button.checkInput(pygame.mouse.get_pos())
-
-    screen.fill("white")
-
-    button.draw()
-    pygame.display.update()
-'''

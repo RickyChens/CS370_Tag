@@ -1,10 +1,12 @@
 import pygame
 import sys
+import random
 from constants import *
 from button import Button
-from collision import Player, Obstacle
+from Classes import Player, Obstacle
 from randomMap import generate_random_map
 
+# Initializing Window
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 screen_boundaries = pygame.Rect((0, 0), (WIDTH, HEIGHT))
@@ -13,6 +15,7 @@ background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 
 def play():
+    # Creating all random obstacles
     obstacles = []
     mapping = generate_random_map()
     for r in range(len(mapping)):
@@ -21,8 +24,19 @@ def play():
                 obstacle = Obstacle(r, c, mapping, WHITE)
                 obstacles.append(obstacle)
 
+    # Initializing and randomizing player position
     player = Player((500, 500))
+    player_width = player.rect.width
+    player_height = player.rect.height
+    while True:
+        x = random.randint(0, WIDTH - player_width)
+        y = random.randint(0, HEIGHT - player_height)
+        new_rect = pygame.Rect(x, y, player_width, player_height)
 
+        # Check for collision with obstacles
+        if not any(new_rect.colliderect(obstacle) for obstacle in obstacles):
+            player.rect.topleft = (x, y)
+            break
     player_group = pygame.sprite.Group()
     player_group.add(player)
 
