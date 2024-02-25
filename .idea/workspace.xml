@@ -4,8 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec65bd22-c226-435a-b5d6-0086a04afe6e" name="Changes" comment="Rough Draft of Main Menu">
+    <list default="true" id="ec65bd22-c226-435a-b5d6-0086a04afe6e" name="Changes" comment="Random Map Fixed">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cycle 1/Homescreen.py" beforeDir="false" afterPath="$PROJECT_DIR$/Cycle 1/Homescreen.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cycle 1/collision.py" beforeDir="false" afterPath="$PROJECT_DIR$/Cycle 1/collision.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cycle 1/random gen map.py" beforeDir="false" afterPath="$PROJECT_DIR$/Cycle 1/randomMap.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,6 +66,24 @@
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/Ricky/Desktop/CS370/CS370_Tag/Cycle 1&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.Collison test with hitbox.executor": "Debug",
+    "Python.Homescreen.executor": "Run",
+    "Python.Sound test.executor": "Run",
+    "Python.client.executor": "Run",
+    "Python.collision.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.random gen map.executor": "Run",
+    "Python.server.executor": "Run",
+    "Python.test.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/Ricky/Desktop/CS370/CS370_Tag/Cycle 1"
   }
 }</component>
   <component name="RecentsManager">
@@ -70,7 +91,6 @@
       <recent name="C:\Users\Ricky\Desktop\CS370\CS370_Tag\Cycle 1" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\Ricky\Desktop\CS370\CS370_Tag\Cycle 1\Assets" />
       <recent name="C:\Users\Ricky\Desktop\CS370\CS370_Tag\Cycle 1" />
     </key>
   </component>
@@ -241,31 +261,23 @@
       <option name="project" value="LOCAL" />
       <updated>1705946149501</updated>
     </task>
-    <task id="LOCAL-00002" summary="masking with collision">
+    <task id="LOCAL-00002" summary="Random Map Broken">
       <option name="closed" value="true" />
-      <created>1708229322332</created>
+      <created>1708538168957</created>
       <option name="number" value="00002" />
       <option name="presentableId" value="LOCAL-00002" />
       <option name="project" value="LOCAL" />
-      <updated>1708229322332</updated>
+      <updated>1708538168957</updated>
     </task>
-    <task id="LOCAL-00003" summary="Rough Draft of Main Menu">
+    <task id="LOCAL-00003" summary="Random Map Fixed">
       <option name="closed" value="true" />
-      <created>1708377127355</created>
+      <created>1708631863592</created>
       <option name="number" value="00003" />
       <option name="presentableId" value="LOCAL-00003" />
       <option name="project" value="LOCAL" />
-      <updated>1708377127355</updated>
+      <updated>1708631863592</updated>
     </task>
-    <task id="LOCAL-00004" summary="Rough Draft of Main Menu">
-      <option name="closed" value="true" />
-      <created>1708377339183</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1708377339183</updated>
-    </task>
-    <option name="localTasksCounter" value="5" />
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -281,8 +293,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Startup files" />
-    <MESSAGE value="masking with collision" />
-    <MESSAGE value="Rough Draft of Main Menu" />
-    <option name="LAST_COMMIT_MESSAGE" value="Rough Draft of Main Menu" />
+    <MESSAGE value="Random Map Broken" />
+    <MESSAGE value="Random Map Fixed" />
+    <option name="LAST_COMMIT_MESSAGE" value="Random Map Fixed" />
   </component>
 </project>

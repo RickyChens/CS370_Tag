@@ -3,6 +3,7 @@ import sys
 from constants import *
 from button import Button
 from collision import Player, Obstacle
+from randomMap import generate_random_map
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -12,8 +13,15 @@ background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 
 def play():
+    obstacles = []
+    mapping = generate_random_map()
+    for r in range(len(mapping)):
+        for c in range(len(mapping[r])):
+            if mapping[r][c] == 1:
+                obstacle = Obstacle(r, c, mapping, WHITE)
+                obstacles.append(obstacle)
+
     player = Player((500, 500))
-    obstacle = Obstacle((300, 300), RED)
 
     player_group = pygame.sprite.Group()
     player_group.add(player)
@@ -33,19 +41,20 @@ def play():
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_LEFT]:
-            player.move(-5, 0, obstacle, player_group)
+            player.move(-5, 0, obstacles, player_group)
         if keys[pygame.K_RIGHT]:
-            player.move(5, 0, obstacle, player_group)
+            player.move(5, 0, obstacles, player_group)
         if keys[pygame.K_UP]:
-            player.move(0, -5, obstacle, player_group)
+            player.move(0, -5, obstacles, player_group)
         if keys[pygame.K_DOWN]:
-            player.move(0, 5, obstacle, player_group)
+            player.move(0, 5, obstacles, player_group)
 
         player.rect.clamp_ip(screen_boundaries)
 
         screen.fill(BLACK)
+        for obstacle in obstacles:
+            screen.blit(obstacle.image, obstacle.rect)
         screen.blit(player.image, player.rect)
-        screen.blit(obstacle.image, obstacle.rect)
         pygame.display.flip()
         clock.tick(60)
 
