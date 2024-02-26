@@ -1,5 +1,7 @@
 import pygame
+import random
 from constants import *
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos):
@@ -26,6 +28,13 @@ class Player(pygame.sprite.Sprite):
                     self.rect = old_rect
                     break
 
+    def checkCircleCollision(self, modifier, player_group):
+        if pygame.sprite.spritecollide(modifier, player_group, False, pygame.sprite.collide_mask):
+            if random.random() < 0.5:
+                print("Speed Boost")
+            else:
+                print("Slow Debuff")
+
 
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, r, c, mapping, color):
@@ -41,3 +50,15 @@ class Obstacle(pygame.sprite.Sprite):
         self.image.set_colorkey((255, 100, 98))
         pos = (c * (WIDTH // len(mapping[r])), r * (HEIGHT // len(mapping)))
         self.rect = self.image.get_rect(topleft=pos)
+
+
+class Modifier(pygame.sprite.Sprite):
+    def __init__(self, screen, pos, radius):
+        super().__init__()
+
+        self.screen = screen
+        self.pos = pos
+        self.radius = radius
+
+    def draw(self):
+        pygame.draw.circle(self.screen, RED, self.pos, self.radius)

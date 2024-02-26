@@ -3,7 +3,7 @@ import sys
 import random
 from constants import *
 from button import Button
-from Classes import Player, Obstacle
+from Classes import Player, Obstacle, Modifier
 from randomMap import generate_random_map
 
 # Initializing Window
@@ -40,6 +40,16 @@ def play():
     player_group = pygame.sprite.Group()
     player_group.add(player)
 
+    ball = Modifier(screen, (50, 50), 5)
+    while True:
+        x = random.randint(0, WIDTH - 10)
+        y = random.randint(0, HEIGHT - 10)
+        new_rect = pygame.Rect(x, y, 10, 10)
+
+        # Check for collision with obstacles
+        if not any(new_rect.colliderect(obstacle) for obstacle in obstacles):
+            ball.pos = (x, y)
+            break
     clock = pygame.time.Clock()
 
     running = True
@@ -63,12 +73,14 @@ def play():
         if keys[pygame.K_DOWN]:
             player.move(0, 5, obstacles, player_group)
 
+        player.checkCircleCollision(ball, player_group)
         player.rect.clamp_ip(screen_boundaries)
 
         screen.fill(BLACK)
         for obstacle in obstacles:
             screen.blit(obstacle.image, obstacle.rect)
         screen.blit(player.image, player.rect)
+        ball.draw()
         pygame.display.flip()
         clock.tick(60)
 
