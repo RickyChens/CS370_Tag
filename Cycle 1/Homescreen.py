@@ -40,16 +40,7 @@ def play():
     player_group = pygame.sprite.Group()
     player_group.add(player)
 
-    ball = Modifier(screen, (50, 50), 5)
-    while True:
-        x = random.randint(0, WIDTH - 10)
-        y = random.randint(0, HEIGHT - 10)
-        new_rect = pygame.Rect(x, y, 10, 10)
-
-        # Check for collision with obstacles
-        if not any(new_rect.colliderect(obstacle) for obstacle in obstacles):
-            ball.pos = (x, y)
-            break
+    ball = Modifier((500, 500))
     clock = pygame.time.Clock()
 
     running = True
@@ -63,24 +54,25 @@ def play():
                     running = False
 
         keys = pygame.key.get_pressed()
-
+        dx = 5
+        dy = 5
         if keys[pygame.K_LEFT]:
-            player.move(-5, 0, obstacles, player_group)
+            player.move(-dx, 0, obstacles, player_group)
         if keys[pygame.K_RIGHT]:
-            player.move(5, 0, obstacles, player_group)
+            player.move(dx, 0, obstacles, player_group)
         if keys[pygame.K_UP]:
-            player.move(0, -5, obstacles, player_group)
+            player.move(0, -dy, obstacles, player_group)
         if keys[pygame.K_DOWN]:
-            player.move(0, 5, obstacles, player_group)
+            player.move(0, dy, obstacles, player_group)
 
-        player.checkCircleCollision(ball, player_group)
+        ball.checkCircleCollision(ball, player_group, obstacles)
         player.rect.clamp_ip(screen_boundaries)
 
-        screen.fill(BLACK)
+        screen.blit(background, (0, 0))
         for obstacle in obstacles:
             screen.blit(obstacle.image, obstacle.rect)
+        screen.blit(ball.image, ball.rect)
         screen.blit(player.image, player.rect)
-        ball.draw()
         pygame.display.flip()
         clock.tick(60)
 

@@ -28,13 +28,6 @@ class Player(pygame.sprite.Sprite):
                     self.rect = old_rect
                     break
 
-    def checkCircleCollision(self, modifier, player_group):
-        if pygame.sprite.spritecollide(modifier, player_group, False, pygame.sprite.collide_mask):
-            if random.random() < 0.5:
-                print("Speed Boost")
-            else:
-                print("Slow Debuff")
-
 
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, r, c, mapping, color):
@@ -53,12 +46,18 @@ class Obstacle(pygame.sprite.Sprite):
 
 
 class Modifier(pygame.sprite.Sprite):
-    def __init__(self, screen, pos, radius):
+    def __init__(self, pos):
         super().__init__()
+        image = pygame.image.load("Assets/black dot.png").convert_alpha()
+        self.image = pygame.transform.scale_by(image, 0.025)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect(center=pos)
 
-        self.screen = screen
-        self.pos = pos
-        self.radius = radius
-
-    def draw(self):
-        pygame.draw.circle(self.screen, RED, self.pos, self.radius)
+    def checkCircleCollision(self, modifier, player_group, obstacles):
+        if pygame.sprite.spritecollide(modifier, player_group, False, pygame.sprite.collide_mask):
+            self.rect.x = random.randint(0, WIDTH)
+            self.rect.y = random.randint(0, HEIGHT)
+            if random.random() < 0.5:
+                print("Speed Boost")
+            else:
+                print("Slow Debuff")
