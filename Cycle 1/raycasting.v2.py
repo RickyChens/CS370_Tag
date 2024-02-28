@@ -1,30 +1,27 @@
 import pygame
 import sys
 import math
+import pygame
+from constants import *
 
 # Initialize Pygame
 pygame.init()
 
-# Constants
-width, height = 800, 600
 fov = 65  # FOV in degrees
 halffov = fov / 2
 ray_count = 550
 ray_length = 125  # Max ray length
 speed = 5
 turn_speed = 0.1
-
-# Colors
-black = (0, 0, 0)
-white = (255, 255, 255)
-red = (255, 0, 0)
+transparent = (0, 0, 0, 0)
+green = (0, 255, 0)
 
 # Screen
-screen = pygame.display.set_mode((width, height))
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Raycasting test")
 
 # Starting position and direction
-player_pos = [width // 2, height // 2]
+player_pos = [WIDTH // 2, HEIGHT // 2]
 player_angle = 0
 
 # Obstacles
@@ -73,13 +70,13 @@ while True:
             if intersection:
                 ray_end = intersection[0]
                 break
-        pygame.draw.line(screen, white, player_pos, ray_end)
+        pygame.draw.line(screen, transparent, player_pos, ray_end)
 
     for obstacle in obstacles:
-        pygame.draw.rect(screen, red, obstacle)
+        pygame.draw.rect(screen, RED, obstacle)
 
-    pygame.draw.circle(screen, white, (int(player_pos[0]), int(player_pos[1])), 5)
+    pygame.draw.circle(screen, WHITE, (int(player_pos[0]), int(player_pos[1])), 5)
 
     pygame.display.flip()
-    screen.fill(black)
+    screen.fill(green)
     pygame.time.Clock().tick(60)
