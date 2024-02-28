@@ -15,6 +15,8 @@ background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 
 def play():
+    dx = 5
+    dy = 5
     # Creating all random obstacles
     obstacles = []
     mapping = generate_random_map()
@@ -41,6 +43,17 @@ def play():
     player_group.add(player)
 
     ball = Modifier((500, 500))
+    while True:
+        x = random.randint(0, WIDTH - ball.rect.width)
+        y = random.randint(0, HEIGHT - ball.rect.height)
+        new_rect = pygame.Rect(x, y, ball.rect.width, ball.rect.height)
+
+        # Check for collision with obstacles
+        if not any(new_rect.colliderect(obstacle) for obstacle in obstacles):
+            ball.rect.topleft = (x, y)
+            break
+
+
     clock = pygame.time.Clock()
 
     running = True
@@ -54,8 +67,6 @@ def play():
                     running = False
 
         keys = pygame.key.get_pressed()
-        dx = 5
-        dy = 5
         if keys[pygame.K_LEFT]:
             player.move(-dx, 0, obstacles, player_group)
         if keys[pygame.K_RIGHT]:
@@ -65,7 +76,10 @@ def play():
         if keys[pygame.K_DOWN]:
             player.move(0, dy, obstacles, player_group)
 
-        ball.checkCircleCollision(ball, player_group, obstacles)
+        temp = ball.checkCircleCollision(ball, player_group, obstacles)
+        dx += temp
+        dy += temp
+
         player.rect.clamp_ip(screen_boundaries)
 
         screen.blit(background, (0, 0))

@@ -55,9 +55,19 @@ class Modifier(pygame.sprite.Sprite):
 
     def checkCircleCollision(self, modifier, player_group, obstacles):
         if pygame.sprite.spritecollide(modifier, player_group, False, pygame.sprite.collide_mask):
-            self.rect.x = random.randint(0, WIDTH)
-            self.rect.y = random.randint(0, HEIGHT)
+            while True:
+                x = random.randint(0, WIDTH - self.rect.width)
+                y = random.randint(0, HEIGHT - self.rect.height)
+                new_rect = pygame.Rect(x, y, self.rect.width, self.rect.height)
+
+                # Check for collision with obstacles
+                if not any(new_rect.colliderect(obstacle) for obstacle in obstacles):
+                    self.rect.topleft = (x, y)
+                    break
             if random.random() < 0.5:
-                print("Speed Boost")
+                print("Speed")
+                return 5
             else:
-                print("Slow Debuff")
+                print("Slow")
+                return -5
+        return 0

@@ -12,7 +12,7 @@ halffov = fov / 2
 ray_count = 550
 ray_length = 125  # Max ray length
 speed = 5
-turn_speed = 0.1
+turn_speed = 10
 
 # Colors
 black = (0, 0, 0)
@@ -41,25 +41,33 @@ while True:
             pygame.quit()
             sys.exit()
 
-    mouse_pos = pygame.mouse.get_pos()
-    angle_to_mouse = math.atan2(mouse_pos[1] - player_pos[1], mouse_pos[0] - player_pos[0])
-    player_angle = math.degrees(angle_to_mouse)
-
     keys = pygame.key.get_pressed()
+
+    # Player Movement
+    dx, dy = 0, 0
+
+    if keys[pygame.K_a]:
+        dx -= speed
+    if keys[pygame.K_d]:
+        dx += speed
+    if keys[pygame.K_w]:
+        dy -= speed
+    if keys[pygame.K_s]:
+        dy += speed
+
+    # Normalize diagonal movement
+    if dx != 0 and dy != 0:
+        dx /= math.sqrt(2)
+        dy /= math.sqrt(2)
+
+    player_pos[0] += dx
+    player_pos[1] += dy
+
+    # Vision Cone Movement
     if keys[pygame.K_LEFT]:
         player_angle -= turn_speed
     if keys[pygame.K_RIGHT]:
         player_angle += turn_speed
-    if keys[pygame.K_UP]:
-        dx = speed * math.cos(math.radians(player_angle))
-        dy = speed * math.sin(math.radians(player_angle))
-        player_pos[0] += dx
-        player_pos[1] += dy
-    if keys[pygame.K_DOWN]:
-        dx = -speed * math.cos(math.radians(player_angle))
-        dy = -speed * math.sin(math.radians(player_angle))
-        player_pos[0] += dx
-        player_pos[1] += dy
 
     # Raycasting
     for ray in range(ray_count):
