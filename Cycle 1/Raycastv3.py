@@ -3,8 +3,36 @@ import sys
 import random
 from constants import *
 from button import Button
-from Classes import Player, Obstacle, Modifier
+from Classes import Player, Obstacle
 from randomMap import generate_random_map
+
+
+def raycast(screen, player_rect, obstacles, flashlight_angle):
+    # Define flashlight parameters
+    flashlight_length = 100
+
+    # Calculate flashlight direction based on player's facing direction and flashlight angle
+    facing_direction = pygame.math.Vector2(1, 0)  # Initial facing direction
+    facing_direction.rotate_ip(flashlight_angle)
+
+    # Calculate angle range for the flashlight cone
+    half_angle = 30  # Half of the angle of the flashlight cone
+
+    # Adjust opacity for rays
+    ray_color = (255, 255, 0, 20)  # Yellow color with 100 alpha (transparency)
+
+    # Cast rays within the flashlight cone
+    for angle in range(int(-half_angle), int(half_angle) + 1):
+        direction = facing_direction.rotate(angle)
+        ray_end = player_rect.center + direction * flashlight_length
+
+        # Draw ray with adjusted opacity
+        pygame.draw.line(screen, ray_color, player_rect.center, ray_end, 2)
+
+        # Check for obstacle collisions
+        for obstacle in obstacles:
+            if obstacle.rect.collidepoint(ray_end):
+                break
 
 # Initializing Window
 pygame.init()
@@ -40,20 +68,14 @@ def play():
     player_group = pygame.sprite.Group()
     player_group.add(player)
 
-    ball = Modifier((500, 500))
-    while True:
-        x = random.randint(0, WIDTH - ball.rect.width)
-        y = random.randint(0, HEIGHT - ball.rect.height)
-        new_rect = pygame.Rect(x, y, ball.rect.width, ball.rect.height)
-
-        # Check for collision with obstacles
-        if not any(new_rect.colliderect(obstacle) for obstacle in obstacles):
-            ball.rect.topleft = (x, y)
-            break
-
     clock = pygame.time.Clock()
 
     running = True
+
+    turn_left = False
+    turn_right = False
+    flashlight_angle = 0
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -62,41 +84,45 @@ def play():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
-            elif event.type == pygame.USEREVENT:
-                player.resetSpeed()
-                dx = 5
-                dy = 5
+                elif event.key == pygame.K_LEFT:
+                    turn_left = True
+                elif event.key == pygame.K_RIGHT:
+                    turn_right = True
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT:
+                    turn_left = False
+                elif event.key == pygame.K_RIGHT:
+                    turn_right = False
 
-        dx = 5 + player.speed_modifier
-        dy = 5 + player.speed_modifier
-        print(dx)
-        print(dy)
+        if turn_left:
+            flashlight_angle -= 5  # Decrease flashlight angle
+        if turn_right:
+            flashlight_angle += 5  # Increase flashlight angle
+
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            player.move(-dx, 0, obstacles, player_group)
-        if keys[pygame.K_RIGHT]:
-            player.move(dx, 0, obstacles, player_group)
-        if keys[pygame.K_UP]:
-            player.move(0, -dy, obstacles, player_group)
-        if keys[pygame.K_DOWN]:
-            player.move(0, dy, obstacles, player_group)
 
-        temp = ball.checkCircleCollision(ball, player_group, obstacles)
-        if temp == 1:
-            player.speedBuff(5)
-        elif temp == 0:
-            player.SlowDebuff(5)
+        # Movement based on WASD keys
+        dx, dy = 0, 0
+        if keys[pygame.K_a]:
+            dx = -5
+        if keys[pygame.K_d]:
+            dx = 5
+        if keys[pygame.K_w]:
+            dy = -5
+        if keys[pygame.K_s]:
+            dy = 5
+        player.move(dx, dy, obstacles, player_group)
 
         player.rect.clamp_ip(screen_boundaries)
 
-        screen.blit(background, (0, 0))
-        for obstacle in obstacles:
-            screen.blit(obstacle.image, obstacle.rect)
-        screen.blit(ball.image, ball.rect)
-        screen.blit(player.image, player.rect)
+        screen.fill(BLACK)
+
+        raycast(screen, player.rect, obstacles, flashlight_angle)
+
+        # Render only players and objects within the rays...
+
         pygame.display.flip()
         clock.tick(60)
-
 
 def menu():
     while True:
@@ -126,6 +152,7 @@ def menu():
             if event.type == pygame.MOUSEBUTTONUP:
                 if start_button.checkInput(pygame.mouse.get_pos()):
                     play()
+
 
 
 menu()
