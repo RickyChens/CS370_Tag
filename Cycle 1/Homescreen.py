@@ -3,7 +3,7 @@ import sys
 import random
 from constants import *
 from button import Button
-from Classes import Player, Obstacle
+from Classes import Player, Obstacle, Modifier
 from randomMap import generate_random_map
 
 # Initializing Window
@@ -40,6 +40,17 @@ def play():
     player_group = pygame.sprite.Group()
     player_group.add(player)
 
+    ball = Modifier((500, 500))
+    while True:
+        x = random.randint(0, WIDTH - ball.rect.width)
+        y = random.randint(0, HEIGHT - ball.rect.height)
+        new_rect = pygame.Rect(x, y, ball.rect.width, ball.rect.height)
+
+        # Check for collision with obstacles
+        if not any(new_rect.colliderect(obstacle) for obstacle in obstacles):
+            ball.rect.topleft = (x, y)
+            break
+
     clock = pygame.time.Clock()
 
     running = True
@@ -51,23 +62,37 @@ def play():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+            elif event.type == pygame.USEREVENT:
+                player.resetSpeed()
+                dx = 5
+                dy = 5
 
+        dx = 5 + player.speed_modifier
+        dy = 5 + player.speed_modifier
+        print(dx)
+        print(dy)
         keys = pygame.key.get_pressed()
-
         if keys[pygame.K_LEFT]:
-            player.move(-5, 0, obstacles, player_group)
+            player.move(-dx, 0, obstacles, player_group)
         if keys[pygame.K_RIGHT]:
-            player.move(5, 0, obstacles, player_group)
+            player.move(dx, 0, obstacles, player_group)
         if keys[pygame.K_UP]:
-            player.move(0, -5, obstacles, player_group)
+            player.move(0, -dy, obstacles, player_group)
         if keys[pygame.K_DOWN]:
-            player.move(0, 5, obstacles, player_group)
+            player.move(0, dy, obstacles, player_group)
+
+        temp = ball.checkCircleCollision(ball, player_group, obstacles)
+        if temp == 1:
+            player.speedBuff(5)
+        elif temp == 0:
+            player.SlowDebuff(5)
 
         player.rect.clamp_ip(screen_boundaries)
 
-        screen.fill(BLACK)
+        screen.blit(background, (0, 0))
         for obstacle in obstacles:
             screen.blit(obstacle.image, obstacle.rect)
+        screen.blit(ball.image, ball.rect)
         screen.blit(player.image, player.rect)
         pygame.display.flip()
         clock.tick(60)
