@@ -3,7 +3,7 @@ import sys
 import random
 from constants import *
 from button import Button
-from Classes import Player, Obstacle, Modifier
+from Classes import Player, Obstacle, Modifier, Bot
 from randomMap import generate_random_map
 
 # Initializing Window
@@ -51,6 +51,24 @@ def play():
             ball.rect.topleft = (x, y)
             break
 
+        # Initialize the bot
+    bot = Bot((100, 100))
+    bot_group = pygame.sprite.Group()
+    bot_group.add(bot)
+
+    # Initialize the bot and ensure it doesn't collide with obstacles upon spawn
+    bot_width = bot.rect.width
+    bot_height = bot.rect.height
+    while True:
+        x = random.randint(0, WIDTH - bot_width)
+        y = random.randint(0, HEIGHT - bot_height)
+        new_rect = pygame.Rect(x, y, bot_width, bot_height)
+
+        # Check for collision with obstacles
+        if not any(new_rect.colliderect(obstacle) for obstacle in obstacles):
+            bot.rect.topleft = (x, y)
+            break
+
     clock = pygame.time.Clock()
 
     running = True
@@ -66,11 +84,13 @@ def play():
                 player.resetSpeed()
                 dx = 5
                 dy = 5
+            elif event.type == pygame.USEREVENT + 1:
+                bot.resetSpeed()
+                dx = 5
+                dy = 5
 
         dx = 5 + player.speed_modifier
         dy = 5 + player.speed_modifier
-        print(dx)
-        print(dy)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             player.move(-dx, 0, obstacles, player_group)
@@ -81,6 +101,12 @@ def play():
         if keys[pygame.K_DOWN]:
             player.move(0, dy, obstacles, player_group)
 
+        bot_modifier = ball.checkCircleCollision(ball, bot_group, obstacles)
+        if bot_modifier == 1:
+            bot.speedBuff(5)
+        elif bot_modifier == 0:
+            bot.SlowDebuff(5)
+        bot.move_towards_player(player.rect.topleft, obstacles, screen_boundaries)
         temp = ball.checkCircleCollision(ball, player_group, obstacles)
         if temp == 1:
             player.speedBuff(5)
@@ -93,6 +119,7 @@ def play():
         for obstacle in obstacles:
             screen.blit(obstacle.image, obstacle.rect)
         screen.blit(ball.image, ball.rect)
+        screen.blit(bot.image, bot.rect)
         screen.blit(player.image, player.rect)
         pygame.display.flip()
         clock.tick(60)
