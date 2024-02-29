@@ -10,6 +10,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.scale_by(image, 0.25)
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect(center=pos)
+        self.speed_modifier = 0
 
     def move(self, dx, dy, obstacles, player_group):
         if dx != 0 or dy != 0:
@@ -27,6 +28,17 @@ class Player(pygame.sprite.Sprite):
                 if pygame.sprite.spritecollide(obstacle, player_group, False, pygame.sprite.collide_mask):
                     self.rect = old_rect
                     break
+
+    def speedBuff(self, duration):
+        self.speed_modifier = 2
+        pygame.time.set_timer(pygame.USEREVENT, duration * 1000)  # Set a timer to reset the speed after duration
+
+    def SlowDebuff(self, duration):
+        self.speed_modifier = -2
+        pygame.time.set_timer(pygame.USEREVENT, duration * 1000)  # Set a timer to reset the speed after duration
+
+    def resetSpeed(self):
+        self.speed_modifier = 0
 
 
 class Obstacle(pygame.sprite.Sprite):
@@ -64,10 +76,9 @@ class Modifier(pygame.sprite.Sprite):
                 if not any(new_rect.colliderect(obstacle) for obstacle in obstacles):
                     self.rect.topleft = (x, y)
                     break
-            if random.random() < 0.5:
+            if random.random() < 0.3:
                 print("Speed")
-                return 5
+                return 1
             else:
                 print("Slow")
-                return -5
-        return 0
+                return 0
