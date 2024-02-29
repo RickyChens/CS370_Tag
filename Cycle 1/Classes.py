@@ -49,8 +49,8 @@ class Obstacle(pygame.sprite.Sprite):
         #             WIDTH // len(mapping[r]),
         #             HEIGHT // len(mapping))
 
-        self.image = pygame.Surface([WIDTH // len(mapping[r]),
-                                     HEIGHT // len(mapping)])
+        self.image = pygame.Surface([WIDTH // len(mapping[r])+1,
+                                     HEIGHT // len(mapping)+1])
         self.image.fill(color)
         self.image.set_colorkey((255, 100, 98))
         pos = (c * (WIDTH // len(mapping[r])), r * (HEIGHT // len(mapping)))
