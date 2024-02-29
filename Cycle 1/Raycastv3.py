@@ -1,38 +1,47 @@
 import pygame
 import sys
 import random
+import math
 from constants import *
 from button import Button
 from Classes import Player, Obstacle
 from randomMap import generate_random_map
 
+YELLOW_TRANSPARENT = (255, 255, 0, 100)  # Yellow color with alpha value 100 for transparency
 
-def raycast(screen, player_rect, obstacles, flashlight_angle):
-    # Define flashlight parameters
-    flashlight_length = 100
+def raycast(screen, player_pos, player_angle, obstacles):
+    # Constants for raycasting
+    fov = 60  # Field of view in degrees
+    ray_count = 150  # Number of rays
+    ray_length = 150  # Max ray length
 
-    # Calculate flashlight direction based on player's facing direction and flashlight angle
-    facing_direction = pygame.math.Vector2(1, 0)  # Initial facing direction
-    facing_direction.rotate_ip(flashlight_angle)
+    # Calculate the starting angle for the cone
+    start_angle = player_angle - fov / 2
 
-    # Calculate angle range for the flashlight cone
-    half_angle = 30  # Half of the angle of the flashlight cone
+    # Calculate the angle increment for each ray
+    angle_increment = fov / ray_count
 
-    # Adjust opacity for rays
-    ray_color = (255, 255, 0, 20)  # Yellow color with 100 alpha (transparency)
+    for i in range(ray_count):
+        # Calculate the angle for the current ray
+        angle = math.radians(start_angle + i * angle_increment)
 
-    # Cast rays within the flashlight cone
-    for angle in range(int(-half_angle), int(half_angle) + 1):
-        direction = facing_direction.rotate(angle)
-        ray_end = player_rect.center + direction * flashlight_length
+        # Calculate the direction vector for the ray
+        direction = pygame.math.Vector2(math.cos(angle), math.sin(angle))
 
-        # Draw ray with adjusted opacity
-        pygame.draw.line(screen, ray_color, player_rect.center, ray_end, 2)
+        # Initialize the ray endpoint
+        ray_end = player_pos + direction * ray_length
 
-        # Check for obstacle collisions
+        # Check for collisions with obstacles
         for obstacle in obstacles:
-            if obstacle.rect.collidepoint(ray_end):
-                break
+            # Check if the ray intersects with any part of the obstacle
+            intersection = obstacle.rect.clipline(player_pos, ray_end)
+            if intersection:
+                # Adjust the ray endpoint to the intersection point
+                ray_end = intersection[0]
+
+        # Draw the ray
+        pygame.draw.line(screen, YELLOW_TRANSPARENT, player_pos, ray_end, 2)
+
 
 # Initializing Window
 pygame.init()
@@ -117,12 +126,16 @@ def play():
 
         screen.fill(BLACK)
 
-        raycast(screen, player.rect, obstacles, flashlight_angle)
+        raycast(screen, player.rect.center, flashlight_angle, obstacles)  # Call raycasting function
 
-        # Render only players and objects within the rays...
+        for obstacle in obstacles:
+            screen.blit(obstacle.image, obstacle.rect)
+
+        player_group.draw(screen)
 
         pygame.display.flip()
         clock.tick(60)
+
 
 def menu():
     while True:
@@ -152,7 +165,6 @@ def menu():
             if event.type == pygame.MOUSEBUTTONUP:
                 if start_button.checkInput(pygame.mouse.get_pos()):
                     play()
-
 
 
 menu()
