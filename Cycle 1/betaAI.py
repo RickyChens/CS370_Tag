@@ -3,19 +3,15 @@ import sys
 import random
 from constants import *
 from button import Button
-from Classes import Player, Obstacle, Modifier, Bot
+from betaClasses import Player, Obstacle, Bot
 from randomMap import generate_random_map
 
-# Initializing Window
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-screen_boundaries = pygame.Rect((0, 0), (WIDTH, HEIGHT))
 background = pygame.image.load("Assets/Background.png").convert_alpha()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
-
 def play():
-    # Creating all random obstacles
     obstacles = []
     mapping = generate_random_map()
     for r in range(len(mapping)):
@@ -24,39 +20,19 @@ def play():
                 obstacle = Obstacle(r, c, mapping, WHITE)
                 obstacles.append(obstacle)
 
-    # Initializing and randomizing player position
     player = Player((500, 500))
-    player_width = player.rect.width
-    player_height = player.rect.height
     while True:
-        x = random.randint(0, WIDTH - player_width)
-        y = random.randint(0, HEIGHT - player_height)
-        new_rect = pygame.Rect(x, y, player_width, player_height)
-
-        # Check for collision with obstacles
-        if not any(new_rect.colliderect(obstacle) for obstacle in obstacles):
+        x = random.randint(0, WIDTH - player.rect.width)
+        y = random.randint(0, HEIGHT - player.rect.height)
+        if not any(pygame.Rect(x, y, player.rect.width, player.rect.height).colliderect(obstacle.rect) for obstacle in obstacles):
             player.rect.topleft = (x, y)
             break
     player_group = pygame.sprite.Group()
     player_group.add(player)
 
-    ball = Modifier((500, 500))
-    while True:
-        x = random.randint(0, WIDTH - ball.rect.width)
-        y = random.randint(0, HEIGHT - ball.rect.height)
-        new_rect = pygame.Rect(x, y, ball.rect.width, ball.rect.height)
-
-        # Check for collision with obstacles
-        if not any(new_rect.colliderect(obstacle) for obstacle in obstacles):
-            ball.rect.topleft = (x, y)
-            break
-
-        # Initialize the bot
     bot = Bot((100, 100))
-    bot_group = pygame.sprite.Group()
-    bot_group.add(bot)
+    bot.update_path(player.rect.topleft, mapping)
 
-    # Initialize the bot and ensure it doesn't collide with obstacles upon spawn
     bot_width = bot.rect.width
     bot_height = bot.rect.height
     while True:
@@ -70,7 +46,6 @@ def play():
             break
 
     clock = pygame.time.Clock()
-
     running = True
     while running:
         for event in pygame.event.get():
@@ -80,49 +55,35 @@ def play():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
-            elif event.type == pygame.USEREVENT:
-                player.resetSpeed()
-                dx = 5
-                dy = 5
-            elif event.type == pygame.USEREVENT + 1:
-                bot.resetSpeed()
-                dx = 5
-                dy = 5
 
-        dx = 5 + player.speed_modifier
-        dy = 5 + player.speed_modifier
+        player_moved = False
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
-            player.move(-dx, 0, obstacles, player_group)
+            player.move(-5, 0, obstacles, player_group)
+            player_moved = True
         if keys[pygame.K_RIGHT]:
-            player.move(dx, 0, obstacles, player_group)
+            player.move(5, 0, obstacles, player_group)
+            player_moved = True
         if keys[pygame.K_UP]:
-            player.move(0, -dy, obstacles, player_group)
+            player.move(0, -5, obstacles, player_group)
+            player_moved = True
         if keys[pygame.K_DOWN]:
-            player.move(0, dy, obstacles, player_group)
+            player.move(0, 5, obstacles, player_group)
+            player_moved = True
 
-        bot_modifier = ball.checkCircleCollision(ball, bot_group, obstacles)
-        if bot_modifier == 1:
-            bot.speedBuff(5)
-        elif bot_modifier == 0:
-            bot.SlowDebuff(5)
-        bot.move_towards_player(player.rect.topleft, obstacles, screen_boundaries)
-        temp = ball.checkCircleCollision(ball, player_group, obstacles)
-        if temp == 1:
-            player.speedBuff(5)
-        elif temp == 0:
-            player.SlowDebuff(5)
+        if player_moved:
+            bot.update_path(player.rect.topleft, mapping)
 
-        player.rect.clamp_ip(screen_boundaries)
+        bot.move_towards_player()
 
-        screen.blit(background, (0, 0))
+        screen.fill(BLACK)
         for obstacle in obstacles:
             screen.blit(obstacle.image, obstacle.rect)
-        screen.blit(ball.image, ball.rect)
-        screen.blit(bot.image, bot.rect)
         screen.blit(player.image, player.rect)
+        screen.blit(bot.image, bot.rect)
         pygame.display.flip()
         clock.tick(60)
+
 
 
 def menu():
