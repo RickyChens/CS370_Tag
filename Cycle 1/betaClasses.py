@@ -1,6 +1,10 @@
 import pygame
-import random
+from pathfinding.core.grid import Grid
+from pathfinding.finder.a_star import AStarFinder
 from constants import *
+
+def distance(p1, p2):
+    return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos):
@@ -50,38 +54,23 @@ class Bot(pygame.sprite.Sprite):
         self.image = pygame.transform.scale_by(image, 0.25)
         self.rect = self.image.get_rect(topleft=position)
         self.speed = 10
-        self.move_cooldown = 0  # Cooldown period after each movement
+        self.path = []
+        self.move_cooldown = 0
 
-    def move_towards_player(self, player_pos, obstacles, screen_boundaries):
-        if self.move_cooldown > 0:
+    def update_path(self, player_pos, mapping):
+        grid_matrix = [[0 if cell == 0 else 1 for cell in row] for row in mapping]
+        grid = Grid(matrix=grid_matrix)
+        start = grid.node(self.rect.x // (WIDTH // len(mapping[0])), self.rect.y // (HEIGHT // len(mapping)))
+        end = grid.node(player_pos[0] // (WIDTH // len(mapping[0])), player_pos[1] // (HEIGHT // len(mapping)))
+        finder = AStarFinder()
+        self.path, _ = finder.find_path(start, end, grid)
+
+    def move_towards_player(self):
+        if self.move_cooldown > 0 or not self.path:
             self.move_cooldown -= 1
             return
 
-        dx, dy = player_pos[0] - self.rect.x, player_pos[1] - self.rect.y
-        directions = [
-            ('right', self.speed, 0),
-            ('left', -self.speed, 0),
-            ('down', 0, self.speed),
-            ('up', 0, -self.speed),
-            ('downright', self.speed, self.speed),
-            ('downleft', -self.speed, self.speed),
-            ('upright', self.speed, -self.speed),
-            ('upleft', -self.speed, -self.speed)
-        ]
-
-        # Find the direction that minimizes the distance to the player
-        min_distance = float('inf')
-        best_direction = None
-        for direction, x_move, y_move in directions:
-            new_rect = self.rect.move(x_move, y_move)
-            if not any(new_rect.colliderect(obstacle) for obstacle in obstacles) and screen_boundaries.contains(
-                    new_rect):
-                new_distance = distance((new_rect.x, new_rect.y), player_pos)
-                if new_distance < min_distance:
-                    min_distance = new_distance
-                    best_direction = (x_move, y_move)
-
-        # Move in the best direction
-        if best_direction:
-            self.rect.move_ip(*best_direction)
-            self.move_cooldown = 10  # Set the cooldown period after moving
+        next_pos = self.path.pop(0)
+        self.rect.x = next_pos[0] * (WIDTH // len(mapping[0]))
+        self.rect.y = next_pos[1] * (HEIGHT // len(mapping))
+        self.move_cooldown = 10
