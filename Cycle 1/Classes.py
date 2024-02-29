@@ -43,6 +43,32 @@ class Obstacle(pygame.sprite.Sprite):
         pos = (c * (WIDTH // len(mapping[r])), r * (HEIGHT // len(mapping)))
         self.rect = self.image.get_rect(topleft=pos)
 
+
+class Modifier(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+        image = pygame.image.load("Assets/black dot.png").convert_alpha()
+        self.image = pygame.transform.scale_by(image, 0.025)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect(center=pos)
+
+    def checkCircleCollision(self, modifier, player_group, obstacles):
+        if pygame.sprite.spritecollide(modifier, player_group, False, pygame.sprite.collide_mask):
+            while True:
+                x = random.randint(0, WIDTH - self.rect.width)
+                y = random.randint(0, HEIGHT - self.rect.height)
+                new_rect = pygame.Rect(x, y, self.rect.width, self.rect.height)
+
+                # Check for collision with obstacles
+                if not any(new_rect.colliderect(obstacle) for obstacle in obstacles):
+                    self.rect.topleft = (x, y)
+                    break
+            if random.random() < 0.33:
+                print("Speed")
+                return 1
+            else:
+                print("Slow")
+                return 0
 class Bot(pygame.sprite.Sprite):
     def __init__(self, position):
         super().__init__()
