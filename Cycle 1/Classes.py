@@ -2,8 +2,10 @@ import pygame
 import random
 from constants import *
 
+
 def distance(p1, p2):
     return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos):
@@ -13,6 +15,13 @@ class Player(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect(center=pos)
         self.speed_modifier = 0
+        self.isTagged = False
+
+    def getIsTagged(self):
+        return self.isTagged
+
+    def setIsTagged(self, flag):
+        self.isTagged = flag
 
     def move(self, dx, dy, obstacles, player_group):
         if dx != 0 or dy != 0:
@@ -95,12 +104,20 @@ class Bot(pygame.sprite.Sprite):
         self.speed = 10
         self.move_cooldown = 0  # Cooldown period after each movement
         self.speed_modifier = 0
+        self.isTagged = False
+
+    def getIsTagged(self):
+        return self.isTagged
+
+    def setIsTagged(self, flag):
+        self.isTagged = flag
+
     def move_towards_player(self, player_pos, obstacles, screen_boundaries):
         self.speed = 10 + self.speed_modifier
         if self.move_cooldown > 0:
             self.move_cooldown -= 1
             return
-        print(self.speed)
+        # print(self.speed)
         dx, dy = player_pos[0] - self.rect.x, player_pos[1] - self.rect.y
         directions = [
             ('right', self.speed, 0),
