@@ -97,7 +97,7 @@ def play():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    running = False
+                    menu()
                 elif event.key == pygame.K_LEFT:
                     turn_left = True
                 elif event.key == pygame.K_RIGHT:
@@ -167,11 +167,11 @@ def play():
         if player.getIsTagged():
             tagged_time += 1
             if tagged_time % (5 * 60) == 0:
-                player_score += 1
+                bot_score += 1
         else:
             tagged_time += 1
             if tagged_time % (5 * 60) == 0:
-                bot_score += 1
+                player_score += 1
 
         player.rect.clamp_ip(screen_boundaries)
 
@@ -200,8 +200,49 @@ def play():
         screen.blit(player_score_text, (10, 10))
         screen.blit(bot_score_text, (WIDTH - 150, 10))
 
+        # Game ending
+        if time_tracker / 60 >= 120: # If the time is more than 120 seconds
+            if player_score > bot_score:
+                winnerMenu("player")
+            else:
+                winnerMenu("bot")
+
         pygame.display.flip()
         clock.tick(60)
+
+
+def winnerMenu(winner):
+    while True:
+        screen.blit(background, (0, 0))
+        if winner == "player":
+            winner_text = (pygame.font.Font("Assets/GlitchGoblin.ttf", 50).
+                           render("Player is the Winner!", True, "#b68f40"))
+        else:
+            winner_text = (pygame.font.Font("Assets/GlitchGoblin.ttf", 50).
+                           render("Bot is the Winner!", True, "#b68f40"))
+        winner_rect = winner_text.get_rect(center=(390, 150))
+        screen.blit(winner_text, winner_rect)
+
+        restart_button = Button(pygame.Surface([230, 80]), (390, 300), "Retry",
+                                pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
+        menu_button = Button(pygame.Surface([230, 80]), (390, 400), "Menu",
+                             pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
+
+        restart_button.draw(screen)
+        menu_button.draw(screen)
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONUP:
+                if restart_button.checkInput(pygame.mouse.get_pos()):
+                    play()
+            if event.type == pygame.MOUSEBUTTONUP:
+                if menu_button.checkInput(pygame.mouse.get_pos()):
+                    menu()
 
 
 def menu():
