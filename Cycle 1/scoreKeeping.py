@@ -204,8 +204,10 @@ def play():
         if time_tracker / 60 >= 120: # If the time is more than 120 seconds
             if player_score > bot_score:
                 winnerMenu("player")
-            else:
+            elif bot_score > player_score:
                 winnerMenu("bot")
+            elif bot_score == player_score:
+                winnerMenu("tie")
 
         pygame.display.flip()
         clock.tick(60)
@@ -217,9 +219,12 @@ def winnerMenu(winner):
         if winner == "player":
             winner_text = (pygame.font.Font("Assets/GlitchGoblin.ttf", 50).
                            render("Player is the Winner!", True, "#b68f40"))
-        else:
+        elif winner == "bot":
             winner_text = (pygame.font.Font("Assets/GlitchGoblin.ttf", 50).
                            render("Bot is the Winner!", True, "#b68f40"))
+        elif winner == "tie":
+            winner_text = (pygame.font.Font("Assets/GlitchGoblin.ttf", 50).
+                           render("It's a TIE!", True, "#b68f40"))
         winner_rect = winner_text.get_rect(center=(390, 150))
         screen.blit(winner_text, winner_rect)
 
