@@ -8,7 +8,7 @@ from randomMap import generate_random_map
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-background = pygame.image.load("Assets/Background.png").convert_alpha()
+background = pygame.image.load("../Cycle 1/Assets/Background.png").convert_alpha()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 def play():
@@ -90,14 +90,14 @@ def menu():
     while True:
         # Background and Title Text
         screen.blit(background, (0, 0))
-        tag_menu = pygame.font.Font("Assets/GlitchGoblin.ttf", 100).render("TAG", True, "#b68f40")
+        tag_menu = pygame.font.Font("../Cycle 1/Assets/GlitchGoblin.ttf", 100).render("TAG", True, "#b68f40")
         menu_rect = tag_menu.get_rect(center=(390, 150))  # Center Text
         screen.blit(tag_menu, menu_rect)
 
         start_button = Button(pygame.Surface([230, 80]), (390, 300), "Start",
-                              pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
+                              pygame.font.Font("../Cycle 1/Assets/GlitchGoblin.ttf", 65))
         quit_button = Button(pygame.Surface([230, 80]), (390, 400), "Quit",
-                             pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
+                             pygame.font.Font("../Cycle 1/Assets/GlitchGoblin.ttf", 65))
 
         start_button.draw(screen)
         quit_button.draw(screen)

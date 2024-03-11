@@ -9,7 +9,7 @@ def distance(p1, p2):
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
-        image = pygame.image.load("soldier.png").convert_alpha()
+        image = pygame.image.load("../Cycle 1/soldier.png").convert_alpha()
         self.image = pygame.transform.scale_by(image, 0.25)
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect(center=pos)
@@ -50,7 +50,7 @@ class Obstacle(pygame.sprite.Sprite):
 class Bot(pygame.sprite.Sprite):
     def __init__(self, position):
         super().__init__()
-        image = pygame.image.load("soldier.png").convert_alpha()
+        image = pygame.image.load("../Cycle 1/soldier.png").convert_alpha()
         self.image = pygame.transform.scale_by(image, 0.25)
         self.rect = self.image.get_rect(topleft=position)
         self.speed = 10
