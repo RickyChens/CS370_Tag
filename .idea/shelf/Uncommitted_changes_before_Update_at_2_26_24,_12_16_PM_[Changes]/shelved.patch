@@ -1,0 +1,90 @@
+Index: Cycle 1/random gen map.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import pygame\nimport random\nfrom constants import *\n\npygame.init()\nscreen = pygame.display.set_mode((HEIGHT, WIDTH))\nscreen_boundaries = pygame.Rect((0, 0), (HEIGHT, WIDTH))\n\nCELL_SIZE = 60  # Adjust cell size\nPLAYER_SIZE = 20  # Adjust player size\n\ndef generate_random_map():\n    map_grid = [[1 for _ in range(15)] for _ in range(15)]  # Increase map size\n\n    def is_valid_cell(x, y):\n        return 0 <= x < 15 and 0 <= y < 15\n\n    def backtrack(x, y):\n        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]\n        random.shuffle(directions)\n\n        for dx, dy in directions:\n            new_x, new_y = x + 2 * dx, y + 2 * dy\n            if is_valid_cell(new_x, new_y) and map_grid[new_x][new_y] == 1:\n                map_grid[new_x][new_y] = 0\n                map_grid[x + dx][y + dy] = 0\n                backtrack(new_x, new_y)\n\n    start_x, start_y = random.randint(0, 7) * 2, random.randint(0, 7) * 2\n    map_grid[start_x][start_y] = 0\n    backtrack(start_x, start_y)\n\n    # Introduce more randomness by breaking some walls\n    for i in range(15):\n        for j in range(15):\n            if random.random() < 0.6:  # Adjust probability for openness\n                map_grid[i][j] = 0\n\n    # Check for dead ends and convert them into corridors\n    for i in range(15):\n        for j in range(15):\n            if map_grid[i][j] == 0:\n                neighbors = [(i+1, j), (i-1, j), (i, j+1), (i, j-1)]\n                num_openings = sum(1 for x, y in neighbors if is_valid_cell(x, y) and map_grid[x][y] == 0)\n                if num_openings == 1:\n                    map_grid[i][j] = 0  # Convert dead end into corridor\n\n    return map_grid\n\nclass Player(pygame.sprite.Sprite):\n    def __init__(self, pos, color):\n        super().__init__()\n\n        self.image = pygame.Surface((PLAYER_SIZE, PLAYER_SIZE))\n        self.image.fill(color)\n        self.rect = self.image.get_rect(center=pos)\n\n    def move(self, dx, dy):\n        new_rect = self.rect.move(dx, dy)\n        for obstacle in obstacles:\n            if new_rect.colliderect(obstacle):\n                return  # Stop moving if collision occurs\n\n        # Move the player if no collision occurs\n        self.rect.move_ip(dx, dy)\n\nobstacles = []\nmapping = generate_random_map()\nfor r in range(len(mapping)):\n    for c in range(len(mapping[r])):\n        if mapping[r][c] == 1:\n            obstacle = pygame.Rect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE)\n            obstacles.append(obstacle)\n\n# Generate player position not inside walls\nplayer_position = None\nwhile player_position is None or (mapping[player_position[1] // CELL_SIZE][player_position[0] // CELL_SIZE] == 1) or (mapping[round(float(player_position[1])/CELL_SIZE)][round(float(player_position[0])/CELL_SIZE)] == 1) or (mapping[player_position[1] // CELL_SIZE][player_position[0] // CELL_SIZE] == 1):\n    player_position = (random.randint(0, 14) * CELL_SIZE, random.randint(0, 14) * CELL_SIZE)\n\nplayer = Player(player_position, WHITE)\n\nclock = pygame.time.Clock()\n\nrunning = True\nwhile running:\n    for event in pygame.event.get():\n        if event.type == pygame.QUIT:\n            running = False\n\n    keys = pygame.key.get_pressed()\n\n    dx, dy = 0, 0\n\n    if keys[pygame.K_LEFT]:\n        dx = -2\n    if keys[pygame.K_RIGHT]:\n        dx = 2\n    if keys[pygame.K_UP]:\n        dy = -2\n    if keys[pygame.K_DOWN]:\n        dy = 2\n\n    player.move(dx, dy)\n\n    screen.fill(BLACK)\n    for obstacle in obstacles:\n        pygame.draw.rect(screen, RED, obstacle)\n\n    player.rect.clamp_ip(screen_boundaries)\n    screen.blit(player.image, player.rect)\n    pygame.display.flip()\n    clock.tick(60)\n\npygame.quit()\n
+===================================================================
+diff --git a/Cycle 1/random gen map.py b/Cycle 1/random gen map.py
+--- a/Cycle 1/random gen map.py	
++++ b/Cycle 1/random gen map.py	
+@@ -6,7 +6,7 @@
+ screen = pygame.display.set_mode((HEIGHT, WIDTH))
+ screen_boundaries = pygame.Rect((0, 0), (HEIGHT, WIDTH))
+ 
+-CELL_SIZE = 60  # Adjust cell size
++CELL_SIZE = 55  # Adjust cell size
+ PLAYER_SIZE = 20  # Adjust player size
+ 
+ def generate_random_map():
+@@ -55,30 +55,45 @@
+         self.image.fill(color)
+         self.rect = self.image.get_rect(center=pos)
+ 
+-    def move(self, dx, dy):
++    def move(self, dx, dy, obstacles):
++        # Determine the desired movement rectangle
+         new_rect = self.rect.move(dx, dy)
++
++        # Check if the new position collides with any obstacles
+         for obstacle in obstacles:
+-            if new_rect.colliderect(obstacle):
+-                return  # Stop moving if collision occurs
++            if new_rect.colliderect(obstacle.rect):
++                return  # Stop movement if collision occurs with any obstacle
+ 
+         # Move the player if no collision occurs
+         self.rect.move_ip(dx, dy)
+ 
+-obstacles = []
+-mapping = generate_random_map()
+-for r in range(len(mapping)):
+-    for c in range(len(mapping[r])):
+-        if mapping[r][c] == 1:
+-            obstacle = pygame.Rect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+-            obstacles.append(obstacle)
++def create_obstacles():
++    obstacles = []
++    mapping = generate_random_map()
++    for r in range(len(mapping)):
++        for c in range(len(mapping[r])):
++            if mapping[r][c] == 1:
++                obstacle_rect = pygame.Rect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE)
++                obstacles.append(Obstacle(obstacle_rect, RED))
++    return obstacles
+ 
+-# Generate player position not inside walls
++class Obstacle(pygame.sprite.Sprite):
++    def __init__(self, rect, color):
++        super().__init__()
++        self.image = pygame.Surface(rect.size)
++        self.image.fill(color)
++        self.rect = rect
++
++# Create player object with initial position not inside walls
+ player_position = None
+-while player_position is None or (mapping[player_position[1] // CELL_SIZE][player_position[0] // CELL_SIZE] == 1) or (mapping[round(float(player_position[1])/CELL_SIZE)][round(float(player_position[0])/CELL_SIZE)] == 1) or (mapping[player_position[1] // CELL_SIZE][player_position[0] // CELL_SIZE] == 1):
+-    player_position = (random.randint(0, 14) * CELL_SIZE, random.randint(0, 14) * CELL_SIZE)
++obstacles = create_obstacles()
++
++while player_position is None or any(obstacle.rect.colliderect(pygame.Rect(player_position, (PLAYER_SIZE, PLAYER_SIZE))) for obstacle in obstacles):
++    player_position = (random.randint(1, 13) * CELL_SIZE, random.randint(1, 13) * CELL_SIZE)
+ 
+ player = Player(player_position, WHITE)
+ 
++
+ clock = pygame.time.Clock()
+ 
+ running = True
+@@ -100,11 +115,11 @@
+     if keys[pygame.K_DOWN]:
+         dy = 2
+ 
+-    player.move(dx, dy)
++    player.move(dx, dy, obstacles)
+ 
+     screen.fill(BLACK)
+     for obstacle in obstacles:
+-        pygame.draw.rect(screen, RED, obstacle)
++        pygame.draw.rect(screen, RED, obstacle.rect)
+ 
+     player.rect.clamp_ip(screen_boundaries)
+     screen.blit(player.image, player.rect)
