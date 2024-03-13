@@ -201,7 +201,7 @@ def play():
         screen.blit(bot_score_text, (WIDTH - 150, 10))
 
         # Game ending
-        if time_tracker / 60 >= 30: # If the time is more than 120 seconds
+        if time_tracker / 60 >= 120: # If the time is more than 120 seconds
             if player_score > bot_score:
                 winnerMenu("player")
             elif bot_score > player_score:
