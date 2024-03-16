@@ -201,7 +201,7 @@ def play():
         screen.blit(bot_score_text, (WIDTH - 150, 10))
 
         # Game ending
-        if time_tracker / 60 >= 30:  # If the time is more than 120 seconds
+        if time_tracker / 60 >= 120: # If the time is more than 120 seconds
             if player_score > bot_score:
                 winnerMenu("player")
             elif bot_score > player_score:
@@ -250,42 +250,21 @@ def winnerMenu(winner):
                     menu()
 
 
-def instructionsMenu():
-    while True:
-        instructions = "Instructions Instructions Instructions"
-        screen.blit(background, (0,0))
-        tag_menu = pygame.font.Font("Assets/GlitchGoblin.ttf", 60).render(instructions, True, "#b68f40")
-        menu_rect = tag_menu.get_rect(center=(390, 100))  # Center Text
-        screen.blit(tag_menu, menu_rect)
-        pygame.display.flip()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-
 def menu():
     while True:
         # Background and Title Text
         screen.blit(background, (0, 0))
         tag_menu = pygame.font.Font("Assets/GlitchGoblin.ttf", 100).render("TAG", True, "#b68f40")
-        menu_rect = tag_menu.get_rect(center=(390, 100))  # Center Text
+        menu_rect = tag_menu.get_rect(center=(390, 150))  # Center Text
         screen.blit(tag_menu, menu_rect)
 
         start_button = Button(pygame.Surface([230, 80]), (390, 300), "Start",
                               pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-        quit_button = Button(pygame.Surface([230, 80]), (390, 600), "Quit",
+        quit_button = Button(pygame.Surface([230, 80]), (390, 400), "Quit",
                              pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-        instructions_button = Button(pygame.Surface([460, 80]), (390, 400), "Instructions",
-                                     pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-        multiplayer_button = Button(pygame.Surface([460, 80]), (390, 500), "Multiplayer",
-                                    pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
 
         start_button.draw(screen)
         quit_button.draw(screen)
-        instructions_button.draw(screen)
-        multiplayer_button.draw(screen)
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -299,9 +278,6 @@ def menu():
             if event.type == pygame.MOUSEBUTTONUP:
                 if start_button.checkInput(pygame.mouse.get_pos()):
                     play()
-            if event.type == pygame.MOUSEBUTTONUP:
-                if instructions_button.checkInput(pygame.mouse.get_pos()):
-                    instructionsMenu()
 
 
 menu()
