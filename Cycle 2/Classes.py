@@ -60,10 +60,11 @@ class Obstacle(pygame.sprite.Sprite):
         #             WIDTH // len(mapping[r]),
         #             HEIGHT // len(mapping))
 
-        self.image = pygame.Surface([WIDTH // len(mapping[r]) + 1,
-                                     HEIGHT // len(mapping) + 1])
-        self.image.fill(color)
-        self.image.set_colorkey((255, 100, 98))
+        image = pygame.image.load("Assets/gendtiles.webp").convert_alpha()
+        self.image = pygame.transform.scale(image, (WIDTH // len(mapping[r]) + 1,
+                                                    HEIGHT // len(mapping) + 1))
+        # self.image = pygame.Surface([WIDTH // len(mapping[r]) + 1,
+        #                              HEIGHT // len(mapping) + 1])
         pos = (c * (WIDTH // len(mapping[r])), r * (HEIGHT // len(mapping)))
         self.rect = self.image.get_rect(topleft=pos)
 
