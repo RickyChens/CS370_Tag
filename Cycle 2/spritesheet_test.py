@@ -14,7 +14,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 screen_boundaries = pygame.Rect((0, 0), (WIDTH, HEIGHT))
 background = pygame.image.load("Assets/Background.png").convert_alpha()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-sprite_sheet = pygame.image.load('Assets/RetroSpaceHell_PNG.png').convert_alpha()
+sprite_sheet = pygame.image.load('Assets/RetroSpacePNG.png').convert_alpha()
 test1 = getTile(sprite_sheet, 16, 16, 10, BLACK)
 
 
@@ -31,6 +31,11 @@ def play():
             else:
                 bg_tile = Background(r, c, mapping, test1)
                 background_tiles.append(bg_tile)
+
+    background_surface = pygame.Surface((WIDTH, HEIGHT))
+
+    for bg in background_tiles:
+        background_surface.blit(bg.image, bg.rect)
 
     # Raycasting vars
     turn_left = False
@@ -183,8 +188,7 @@ def play():
         player.rect.clamp_ip(screen_boundaries)
 
         # Draw background
-        for bg in background_tiles:
-            screen.blit(bg.image, bg.rect)
+        screen.blit(background_surface, (0, 0))
 
         # Raycasting drawn and collision checked
         collision_flag = [False]
