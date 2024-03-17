@@ -6,7 +6,7 @@ from button import Button
 from Classes import Player, Obstacle, Modifier, Bot, Background
 from randomMap import generate_random_map
 from Raycasting import raycast
-from testing_sprite import *
+from testing_sprite import getTile
 
 # Initializing Window
 pygame.init()
@@ -14,8 +14,21 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 screen_boundaries = pygame.Rect((0, 0), (WIDTH, HEIGHT))
 background = pygame.image.load("Assets/Background.png").convert_alpha()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+player_sheet = pygame.image.load('Assets/Dungeon_Character.png').convert_alpha()
+sprite_sheet = pygame.image.load('Assets/Dungeon_Tileset.png').convert_alpha()
+red_sprite_sheet = pygame.image.load('Assets/Dungeon_Tileset.png').convert_alpha()
+player_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 32)
+light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
+obstacle_tile = getTile(red_sprite_sheet, 16, 16, 10, BLACK, 56, 80)
+
+""" 
+Shitty looking graphics
 sprite_sheet = pygame.image.load('Assets/RetroSpacePNG.png').convert_alpha()
-test1 = getTile(sprite_sheet, 16, 16, 10, BLACK)
+red_sprite_sheet = pygame.image.load('Assets/RetroSpaceHell_PNG.png').convert_alpha()
+player_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 32)
+light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
+obstacle_tile = getTile(red_sprite_sheet, 16, 16, 10, BLACK, 32, 16)
+"""
 
 
 def play():
@@ -26,24 +39,23 @@ def play():
     for r in range(len(mapping)):
         for c in range(len(mapping[r])):
             if mapping[r][c] == 1:
-                obstacle = Obstacle(r, c, mapping, WHITE)
+                obstacle = Obstacle(r, c, mapping, obstacle_tile)
                 obstacles.append(obstacle)
             else:
-                bg_tile = Background(r, c, mapping, test1)
+                bg_tile = Background(r, c, mapping, light_tile)
                 background_tiles.append(bg_tile)
 
     background_surface = pygame.Surface((WIDTH, HEIGHT))
 
     for bg in background_tiles:
         background_surface.blit(bg.image, bg.rect)
-
     # Raycasting vars
     turn_left = False
     turn_right = False
     flashlight_angle = 0
 
     # Initializing and randomizing player position
-    player = Player((500, 500))
+    player = Player((500, 500), player_image)
     player_width = player.rect.width
     player_height = player.rect.height
     while True:
@@ -222,7 +234,6 @@ def play():
                 winnerMenu("bot")
             elif bot_score == player_score:
                 winnerMenu("tie")
-
         pygame.display.flip()
         clock.tick(60)
 

@@ -10,10 +10,9 @@ def distance(p1, p2):
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos):
+    def __init__(self, pos, image):
         super().__init__()
-        image = pygame.image.load("soldier.png").convert_alpha()
-        self.image = pygame.transform.scale_by(image, 0.25)
+        self.image = image
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect(center=pos)
         self.speed_modifier = 0
@@ -55,18 +54,13 @@ class Player(pygame.sprite.Sprite):
 
 
 class Obstacle(pygame.sprite.Sprite):
-    def __init__(self, r, c, mapping, color):
+    def __init__(self, r, c, mapping, image):
         super().__init__()
-        # pygame.Rect(c * (WIDTH // len(mapping[r])),
-        #             r * (HEIGHT // len(mapping)),
-        #             WIDTH // len(mapping[r]),
-        #             HEIGHT // len(mapping))
 
-        image = pygame.image.load("Assets/gendtiles.webp").convert_alpha()
+        self.image = image
         self.image = pygame.transform.scale(image, (WIDTH // len(mapping[r]) + 1,
                                                     HEIGHT // len(mapping) + 1))
-        # self.image = pygame.Surface([WIDTH // len(mapping[r]) + 1,
-        #                              HEIGHT // len(mapping) + 1])
+
         pos = (c * (WIDTH // len(mapping[r])), r * (HEIGHT // len(mapping)))
         self.rect = self.image.get_rect(topleft=pos)
 
@@ -112,7 +106,7 @@ class Modifier(pygame.sprite.Sprite):
 class Bot(pygame.sprite.Sprite):
     def __init__(self, position):
         super().__init__()
-        image = pygame.image.load("soldier.png").convert_alpha()
+        image = pygame.image.load("Assets/soldier.png").convert_alpha()
         self.image = pygame.transform.scale_by(image, 0.25)
         self.rect = self.image.get_rect(topleft=position)
         self.speed = 10

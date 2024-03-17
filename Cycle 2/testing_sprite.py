@@ -1,13 +1,9 @@
 import pygame
-from constants import *
-from button import Button
-import pygame_gui
-import sys
 
 
-def getTile(sheet, width, height, scale, color):
+def getTile(sheet, width, height, scale, color, x, y):
     image = pygame.Surface((width, height)).convert_alpha()
-    image.blit(sheet, (0, 0), (32, 32, width, height))
+    image.blit(sheet, (0, 0), (x, y, width, height))
     image = pygame.transform.scale(image, (width * scale, height * scale))
     image.set_colorkey(color)
 
