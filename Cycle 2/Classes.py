@@ -77,10 +77,9 @@ class Background(pygame.sprite.Sprite):
 
 
 class Modifier(pygame.sprite.Sprite):
-    def __init__(self, pos):
+    def __init__(self, pos, image):
         super().__init__()
-        image = pygame.image.load("Assets/black dot.png").convert_alpha()
-        self.image = pygame.transform.scale_by(image, 0.025)
+        self.image = image
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect(center=pos)
 

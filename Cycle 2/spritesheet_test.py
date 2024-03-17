@@ -19,7 +19,8 @@ sprite_sheet = pygame.image.load('Assets/Dungeon_Tileset.png').convert_alpha()
 red_sprite_sheet = pygame.image.load('Assets/Dungeon_Tileset.png').convert_alpha()
 player_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 32)
 light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
-obstacle_tile = getTile(red_sprite_sheet, 16, 16, 10, BLACK, 56, 80)
+obstacle_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 56, 80)
+modifier_img = getTile(sprite_sheet, 16, 16, 2.5, BLACK, 96, 144-16)
 
 """ 
 Shitty looking graphics
@@ -70,7 +71,7 @@ def play():
     player_group = pygame.sprite.Group()
     player_group.add(player)
 
-    ball = Modifier((500, 500))
+    ball = Modifier((500, 500), modifier_img)
     while True:
         x = random.randint(0, WIDTH - ball.rect.width)
         y = random.randint(0, HEIGHT - ball.rect.height)
