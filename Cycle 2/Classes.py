@@ -69,6 +69,17 @@ class Obstacle(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=pos)
 
 
+class Background(pygame.sprite.Sprite):
+    def __init__(self, r, c, mapping, image):
+        super().__init__()
+
+        self.image = image
+        self.image = pygame.transform.scale(image, (WIDTH // len(mapping[r]) + 1,
+                                                    HEIGHT // len(mapping) + 1))
+        pos = (c * (WIDTH // len(mapping[r])), r * (HEIGHT // len(mapping)))
+        self.rect = self.image.get_rect(topleft=pos)
+
+
 class Modifier(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
