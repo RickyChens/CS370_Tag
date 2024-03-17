@@ -28,9 +28,9 @@ def play():
             if mapping[r][c] == 1:
                 obstacle = Obstacle(r, c, mapping, WHITE)
                 obstacles.append(obstacle)
-            # else:
-            #     bg_tile = Background(r, c, mapping, test1)
-            #     background_tiles.append(bg_tile)
+            else:
+                bg_tile = Background(r, c, mapping, test1)
+                background_tiles.append(bg_tile)
 
     # Raycasting vars
     turn_left = False
@@ -183,8 +183,8 @@ def play():
         player.rect.clamp_ip(screen_boundaries)
 
         # Draw background
-        # for bg in background_tiles:
-        #    screen.blit(bg.image, bg.rect)
+        for bg in background_tiles:
+            screen.blit(bg.image, bg.rect)
 
         # Raycasting drawn and collision checked
         collision_flag = [False]

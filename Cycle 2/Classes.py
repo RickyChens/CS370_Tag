@@ -1,3 +1,5 @@
+import math
+
 import pygame
 import random
 from constants import *
@@ -28,17 +30,30 @@ class Player(pygame.sprite.Sprite):
             self.move_single_axis(dx, dy, obstacles, player_group)
 
     def move_single_axis(self, dx, dy, obstacles, player_group):
-        steps_x = abs(dx) + 1
-        steps_y = abs(dy) + 1
+        steps_x = abs(dx)
+        steps_y = abs(dy)
+
+        # Determine direction of movement
+        step_x = 1 if dx > 0 else -1
+        step_y = 1 if dy > 0 else -1
+
+        remaining_x = steps_x
+        remaining_y = steps_y
 
         for i in range(max(steps_x, steps_y)):
             old_rect = self.rect.copy()
-            self.rect.x += dx / steps_x
-            self.rect.y += dy / steps_y
+
+            if remaining_x > 0:
+                self.rect.x += step_x
+                remaining_x -= 1
+            if remaining_y > 0:
+                self.rect.y += step_y
+                remaining_y -= 1
+
             for obstacle in obstacles:
                 if pygame.sprite.spritecollide(obstacle, player_group, False, pygame.sprite.collide_mask):
                     self.rect = old_rect
-                    break
+                    return
 
     def speedBuff(self, duration):
         self.speed_modifier = 2
