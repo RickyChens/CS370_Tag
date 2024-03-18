@@ -60,7 +60,6 @@ class Obstacle(pygame.sprite.Sprite):
         self.image = image
         self.image = pygame.transform.scale(image, (WIDTH // len(mapping[r]) + 1,
                                                     HEIGHT // len(mapping) + 1))
-
         pos = (c * (WIDTH // len(mapping[r])), r * (HEIGHT // len(mapping)))
         self.rect = self.image.get_rect(topleft=pos)
 
@@ -103,10 +102,9 @@ class Modifier(pygame.sprite.Sprite):
 
 
 class Bot(pygame.sprite.Sprite):
-    def __init__(self, position):
+    def __init__(self, position, image):
         super().__init__()
-        image = pygame.image.load("Assets/soldier.png").convert_alpha()
-        self.image = pygame.transform.scale_by(image, 0.25)
+        self.image = image
         self.rect = self.image.get_rect(topleft=position)
         self.speed = 10
         self.move_cooldown = 0  # Cooldown period after each movement

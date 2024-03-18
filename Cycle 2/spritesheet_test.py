@@ -18,7 +18,9 @@ player_sheet = pygame.image.load('Assets/Dungeon_Character.png').convert_alpha()
 sprite_sheet = pygame.image.load('Assets/Dungeon_Tileset.png').convert_alpha()
 red_sprite_sheet = pygame.image.load('Assets/Dungeon_Tileset.png').convert_alpha()
 player_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 32)
+bot_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 48)
 light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
+# obstacle_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 56, 80)
 obstacle_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 56, 80)
 modifier_img = getTile(sprite_sheet, 16, 16, 2.5, BLACK, 96, 144-16)
 
@@ -50,6 +52,7 @@ def play():
 
     for bg in background_tiles:
         background_surface.blit(bg.image, bg.rect)
+
     # Raycasting vars
     turn_left = False
     turn_right = False
@@ -83,7 +86,7 @@ def play():
             break
 
         # Initialize the bot
-    bot = Bot((100, 100))
+    bot = Bot((100, 100), bot_image)
     bot_group = pygame.sprite.Group()
     bot_group.add(bot)
 
