@@ -1,10 +1,11 @@
 import pygame
 import sys
 import random
+import socket
+import pickle
 from constants import *
 from button import Button
 from Classes import Player, Obstacle, Modifier, Bot, Background
-from randomMap import generate_random_map
 from Raycasting import raycast
 from testing_sprite import getTile
 
@@ -33,12 +34,28 @@ light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
 obstacle_tile = getTile(red_sprite_sheet, 16, 16, 10, BLACK, 32, 16)
 """
 
+# Create a socket object
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Connect to the server
+s.connect(('localhost', 5555))
 
 def play():
     # Creating all random obstacles
     obstacles = []
     background_tiles = []
-    mapping = generate_random_map()
+
+    # Wait for the start message
+    while True:
+        message = s.recv(1024)
+        if message == b'start':
+            break
+
+    # Receive the serialized map data from the server
+    serialized_map = s.recv(1024)
+
+    # Deserialize the map data
+    mapping = pickle.loads(serialized_map)
+
     for r in range(len(mapping)):
         for c in range(len(mapping[r])):
             if mapping[r][c] == 1:
@@ -241,6 +258,55 @@ def play():
         pygame.display.flip()
         clock.tick(60)
 
+def ready_up_menu():
+    while True:
+        screen.blit(background, (0, 0))
+        ready_up_text = pygame.font.Font("Assets/GlitchGoblin.ttf", 50).render("Ready Up", True, "#b68f40")
+        ready_up_rect = ready_up_text.get_rect(center=(390, 150))
+        screen.blit(ready_up_text, ready_up_rect)
+
+        s.sendall(b'get_clients')
+
+        # Receive the current number of clients from the server
+        current_clients = pickle.loads(s.recv(1024))
+
+        print(current_clients)
+
+        ready_button = Button(pygame.Surface([230, 80]), (390, 300), "Ready",
+                              pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
+        unready_button = Button(pygame.Surface([230, 80]), (390, 400), "Unready",
+                                pygame.font.Font("Assets/GlitchGoblin.ttf", 65))  # New Unready button
+        back_button = Button(pygame.Surface([230, 80]), (390, 500), "Back",
+                             pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
+
+        if ready_button.pressed:
+            pygame.draw.rect(screen, (0, 255, 0), ready_button.rect)  # Draw a green rectangle
+        ready_button.draw(screen)
+        unready_button.draw(screen)  # Draw the Unready button
+        back_button.draw(screen)
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    menu()
+            if event.type == pygame.MOUSEBUTTONUP:
+                if ready_button.checkInput(pygame.mouse.get_pos()):
+                    if ready_button.pressed:
+                        s.sendall(b'ready')
+                if unready_button.checkInput(pygame.mouse.get_pos()):  # If Unready button is clicked
+                    s.sendall(b'unready')  # Send 'unready' message to the server
+                if back_button.checkInput(pygame.mouse.get_pos()):
+                    menu()
+        s.sendall(b'get_start')
+        status = s.recv(1024)
+
+        if status == b'start':
+            play()
 
 def winnerMenu(winner):
     while True:
@@ -306,7 +372,7 @@ def menu():
                     sys.exit()
             if event.type == pygame.MOUSEBUTTONUP:
                 if start_button.checkInput(pygame.mouse.get_pos()):
-                    play()
+                    ready_up_menu()
 
 
 menu()

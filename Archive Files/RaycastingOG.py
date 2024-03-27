@@ -1,6 +1,5 @@
 import pygame
 import math
-from constants import *
 
 
 def raycast(screen, player_pos, player_angle, obstacles, bot_rect, collision_flag):
