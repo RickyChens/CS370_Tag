@@ -14,9 +14,6 @@ def raycast(screen, player_pos, player_angle, obstacles, bot_rect, collision_fla
     # Calculate the angle increment for each ray
     angle_increment = fov / ray_count
 
-    # List to store endpoints of all rays
-    ray_endpoints = []
-
     for i in range(ray_count):
         # Calculate the angle for the current ray
         angle = math.radians(start_angle + i * angle_increment)
@@ -47,14 +44,8 @@ def raycast(screen, player_pos, player_angle, obstacles, bot_rect, collision_fla
             if player_intersection:
                 collision_flag[0] = True
 
-        # Store the endpoint of the ray
-        ray_endpoints.append(ray_end)
-
         # Draw the ray
         pygame.draw.line(screen, MILKY_WHITE_TRANSPARENT, ray_start, ray_end, 3)
 
-    # Load the image
-    image = pygame.image.load("path/to/lightfile.png").convert_alpha()  # Replace "path/to/image.png" with the actual path
-
-    # Blit the image onto the screen
-    screen.blit(image, (0, 0))  # Adjust the position as needed
+# Define the milky see-through white color
+MILKY_WHITE_TRANSPARENT = (200, 200, 255, 150)  # R, G, B, Alpha

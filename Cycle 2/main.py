@@ -180,7 +180,6 @@ def play():
         # Raycasting drawn and collision checked
         collision_flag = [False]
         raycast(screen, player.rect.center, flashlight_angle, obstacles, bot.rect, collision_flag)
-        # print(collision_flag[0])
 
         for obstacle in obstacles:
             screen.blit(obstacle.image, obstacle.rect)
