@@ -1,3 +1,5 @@
+import time
+
 import pygame
 import sys
 import random
@@ -139,7 +141,8 @@ def play():
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    menu()
+                    s.sendall(b'unready')  # Send 'unready' message to the server
+                    ready_up_menu()
                 elif event.key == pygame.K_LEFT:
                     turn_left = True
                 elif event.key == pygame.K_RIGHT:
@@ -261,8 +264,11 @@ def ready_up_menu():
         ready_up_text = pygame.font.Font("Assets/GlitchGoblin.ttf", 50).render("Ready Up", True, "#b68f40")
         ready_up_rect = ready_up_text.get_rect(center=(390, 150))
         screen.blit(ready_up_text, ready_up_rect)
-
-        s.sendall(b'get_clients')
+        try:
+            s.sendall(b'get_clients')
+        except (BrokenPipeError, ConnectionResetError):
+            print("Server disconnected")
+            menu()
 
         # Receive the current number of clients from the server
         current_clients = pickle.loads(s.recv(1024))
@@ -299,9 +305,12 @@ def ready_up_menu():
                     s.sendall(b'unready')  # Send 'unready' message to the server
                 if back_button.checkInput(pygame.mouse.get_pos()):
                     menu()
-        s.sendall(b'get_start')
-        status = s.recv(1024)
 
+
+        s.sendall(b'get_start')
+        print("Test")
+        status = s.recv(1024)
+        print(status)
         if status == b'start':
             play()
 
@@ -332,6 +341,7 @@ def winnerMenu(winner):
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                s.close()
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONUP:
@@ -361,15 +371,18 @@ def menu():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                s.close()
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONUP:
                 if quit_button.checkInput(pygame.mouse.get_pos()):
+                    s.close()
                     pygame.quit()
                     sys.exit()
             if event.type == pygame.MOUSEBUTTONUP:
                 if start_button.checkInput(pygame.mouse.get_pos()):
                     ready_up_menu()
+
 
 
 menu()

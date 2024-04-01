@@ -18,26 +18,44 @@ class Server:
         ready_count = 0
         client_ready_status = {client: False for client in self.clients}
         while True:
-            message = client.recv(1024)
-            if message == b'ready':
-                client_ready_status[client] = True
-                if all(client_ready_status.values()):
-                    for client in self.clients:
-                        client.sendall(b'start')
-            elif message == b'unready':
-                client_ready_status[client] = False
-            elif message == b'get_clients':
-                client.sendall(pickle.dumps(len(self.clients)))
-            elif message == b'get_map':
-                random_map = generate_random_map()
-                serialized_map = pickle.dumps(random_map)
-                client.send(serialized_map)
-            else:
-                print(f'Received message: {message} from client: {client}')
+            try:
+                message = client.recv(1024)
 
-            if message == b'get_start':
-                if ready_count == len(self.clients):
-                    client.sendall(pickle.dumps('start'))
+                if message == b'get_start':
+                    if all(client_ready_status.values()):
+                        for client in self.clients:
+                            client.sendall(b'start')
+                    else:
+                        client.sendall(b'wait')
+                elif message == b'ready':
+                    client_ready_status[client] = True
+                elif message == b'unready':
+                    client_ready_status[client] = False
+                elif message == b'get_clients':
+                    print(f'Sending clients to: {client}')
+                    client.sendall(pickle.dumps(len(self.clients)))
+                    print(f'Clients: {self.clients} Finished Sending')
+                elif message == b'get_map':
+                    print("test")
+                    random_map = generate_random_map()
+                    print("Serialize Map Start")
+                    serialized_map = pickle.dumps(random_map)
+                    print("Serialize Map Finished")
+                    print("Start Sending Map")
+                    client.send(serialized_map)
+                    print("Finished Sending Map")
+                else:
+                    print(f'Received message: {message} from client: {client}')
+                if not message:
+                    self.clients.remove(client)
+                    print(f'Client {client} disconnected')
+            except (BrokenPipeError, ConnectionResetError):
+                client.close()
+                self.clients.remove(client)
+                print(f'Client {client} disconnected')
+                break
+
+
     def run(self):
         while True:
             client, addr = self.server.accept()
