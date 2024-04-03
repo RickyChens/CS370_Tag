@@ -8,7 +8,7 @@ from randomMap import generate_random_map
 from Raycasting import raycast
 from testing_sprite import getTile
 
-# Initialize pygame window and necessary variables
+# Initializing Window
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 screen_boundaries = pygame.Rect((0, 0), (WIDTH, HEIGHT))
@@ -20,19 +20,20 @@ red_sprite_sheet = pygame.image.load('Assets/Dungeon_Tileset.png').convert_alpha
 player_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 32)
 bot_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 48)
 light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
+# obstacle_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 56, 80)
 obstacle_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 56, 80)
 modifier_img = getTile(sprite_sheet, 16, 16, 2.5, BLACK, 96, 144-16)
 
-# Define a function to draw the gradient circle around the player
-def draw_gradient_circle(screen, player_pos):
-    gradient_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-    max_radius = 50  # Maximum radius of the gradient circle
-    for radius in range(max_radius, 0, -1):
-        alpha = int(255 * (1 - radius / max_radius))  # Calculate alpha based on distance from max_radius
-        pygame.draw.circle(gradient_surface, (0, 0, 0, alpha), player_pos, radius)
-    screen.blit(gradient_surface, (0, 0))
+""" 
+Shitty looking graphics
+sprite_sheet = pygame.image.load('Assets/RetroSpacePNG.png').convert_alpha()
+red_sprite_sheet = pygame.image.load('Assets/RetroSpaceHell_PNG.png').convert_alpha()
+player_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 32)
+light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
+obstacle_tile = getTile(red_sprite_sheet, 16, 16, 10, BLACK, 32, 16)
+"""
 
-# Define the play function
+
 def play():
     # Creating all random obstacles
     obstacles = []
@@ -201,9 +202,6 @@ def play():
                 player_score += 1
 
         player.rect.clamp_ip(screen_boundaries)
-
-        # Draw the gradient circle around the player
-        draw_gradient_circle(screen, player.rect.center)
 
         # Draw background
         screen.blit(background_surface, (0, 0))
