@@ -41,7 +41,13 @@ while running:
     screen.fill(WHITE)
 
     # Draw the player circle
-    pygame.draw.circle(screen, (0, 0, 0, 0), player_pos, PLAYER_RADIUS)
+    radius = 10
+
+    for i in range(100):
+        alpha = radius/10
+        circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        pygame.draw.circle(circle, (255, 0, 0, alpha), (player_pos[0], player_pos[1]), radius*i)
+        screen.blit(circle, (0, 0))
 
     # Draw multiple concentric circles around the player
     # for i in range(1, NUM_CIRCLES + 1):
