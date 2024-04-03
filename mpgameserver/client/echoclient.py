@@ -2,6 +2,8 @@ from mpgameserver import UdpClient, Timer
 import time
 import sys
 
+#hi
+
 def main():  # pragma: no cover
 
     addr = ('127.0.0.1', 5555)
