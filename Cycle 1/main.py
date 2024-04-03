@@ -2,7 +2,7 @@ import pygame
 import sys
 import random
 from constants import *
-from button import Buttonsd
+from button import Button
 from Classes import Player, Obstacle, Modifier, Bot
 from randomMap import generate_random_map
 from Raycasting import raycast
