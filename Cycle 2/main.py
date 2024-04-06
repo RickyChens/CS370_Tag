@@ -219,11 +219,16 @@ def play():
         initRadius = 100
         radius = (800 - initRadius) // 100
 
-        for i in range(100):
+        for i in range(23):
             alpha = 255 / 100
             circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-            pygame.draw.circle(circle, (0, 0, 0, alpha * i), (player.rect.x, player.rect.y), radius * i, radius)
+            circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
+            pygame.draw.circle(circle, (0, 0, 0, int(alpha * i)), circle_center, radius * i, radius)
             screen.blit(circle, (0, 0))
+        circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
+        pygame.draw.circle(circle, (0, 0, 0, 230), circle_center, 2000, 1848)
+        screen.blit(circle, (0, 0))
 
         screen.blit(ball.image, ball.rect)
         if collision_flag[0]:
