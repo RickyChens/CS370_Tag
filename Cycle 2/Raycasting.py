@@ -57,4 +57,3 @@ def raycast(screen, player_pos, player_angle, obstacles, bot_rect, collision_fla
     image = pygame.image.load("Assets/lightfile.png").convert_alpha()  # Replace "path/to/image.png" with the actual path
     image.set_colorkey(BLACK)
     # Blit the image onto the screen
-    screen.blit(image, (0, 0))  # Adjust the position as needed

@@ -10,7 +10,7 @@ HEIGHT = 600
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 PLAYER_RADIUS = 30  # Radius of the player circle
-NUM_CIRCLES = 30    # Number of concentric circles
+NUM_CIRCLES = 40    # Number of concentric circles
 CIRCLE_RADIUS_STEP = 10  # Step for increasing the radius of each circle
 CIRCLE_RADIUS = 120  # Radius of the innermost circle
 
@@ -40,21 +40,17 @@ while running:
     # Clear the screen
     screen.fill(WHITE)
 
+    # Draw the concentric circles
+    init_radius = 100
+    radius_step = (800 - init_radius) // NUM_CIRCLES
+
+    for i in range(NUM_CIRCLES):
+        circle_radius = init_radius + i * radius_step
+        alpha = 255 - i * (255 // NUM_CIRCLES)  # Smoothly decrease alpha from inner to outer circles
+        pygame.draw.circle(screen, (0, 0, 0, alpha), player_pos, circle_radius, width=1)  # Set width to 1 to make sure circles are visible
+
     # Draw the player circle
-    initRadius = 100
-    radius = (800-initRadius)//40
-
-    for i in range(40):
-        alpha = 255/40
-        circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-        pygame.draw.circle(circle, (0, 0, 0, alpha*i), (player_pos[0], player_pos[1]), radius*i, radius)
-        screen.blit(circle, (0, 0))
-
-    # Draw multiple concentric circles around the player
-    # for i in range(1, NUM_CIRCLES + 1):
-    #     circle_radius = CIRCLE_RADIUS + i * CIRCLE_RADIUS_STEP
-    #     opacity = int(255 * (1 - i / NUM_CIRCLES))  # Calculate opacity based on radius
-    #     pygame.draw.circle(screen, (0, 0, 0, opacity), player_pos, circle_radius)
+    pygame.draw.circle(screen, BLACK, player_pos, PLAYER_RADIUS)
 
     # Update the display
     pygame.display.flip()

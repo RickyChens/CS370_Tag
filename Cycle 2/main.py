@@ -158,6 +158,7 @@ def play():
         if keys[pygame.K_s]:
             player.move(0, dy, obstacles, player_group)
 
+
         # Bot Collision Detection with orb
         bot_modifier = ball.checkCircleCollision(ball, bot_group, obstacles)
         if bot_modifier == 1:
@@ -203,7 +204,6 @@ def play():
         player.rect.clamp_ip(screen_boundaries)
 
         # Draw the gradient circle around the player
-        draw_gradient_circle(screen, player.rect.center)
 
         # Draw background
         screen.blit(background_surface, (0, 0))
@@ -215,6 +215,15 @@ def play():
 
         for obstacle in obstacles:
             screen.blit(obstacle.image, obstacle.rect)
+
+        initRadius = 100
+        radius = (800 - initRadius) // 100
+
+        for i in range(100):
+            alpha = 255 / 100
+            circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+            pygame.draw.circle(circle, (0, 0, 0, alpha * i), (player.rect.x, player.rect.y), radius * i, radius)
+            screen.blit(circle, (0, 0))
 
         screen.blit(ball.image, ball.rect)
         if collision_flag[0]:
