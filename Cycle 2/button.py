@@ -9,7 +9,7 @@ class Button:
 
     def draw(self, screen):
         if self.pressed:
-            self.image.fill((0, 255, 0))  # Fill the image with green color
+            self.image.fill((0, 0, 0))  # Fill the image with green color
         screen.blit(self.image, self.rect)
         screen.blit(self.text, self.text_rect)
 

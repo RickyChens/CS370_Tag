@@ -352,8 +352,9 @@ def connectionMenu():
                     try:
                         s.connect((ip, int(port)))
                         play()
-                    except (socket.error, TypeError, ConnectionError):
+                    except (socket.error, TypeError, ConnectionError, ValueError):
                         error_text = "Invalid IP and/or Port"  # Set error message
+
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     menu()
