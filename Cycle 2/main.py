@@ -2,6 +2,7 @@ import pygame
 import sys
 import random
 import pygame_gui
+import socket
 from constants import *
 from button import Button
 from Classes import Player, Obstacle, Modifier, Bot
@@ -15,6 +16,7 @@ screen_boundaries = pygame.Rect((0, 0), (WIDTH, HEIGHT))
 background = pygame.image.load("Assets/Background.png").convert_alpha()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 instructions = pygame.image.load("Assets/instructions.webp").convert_alpha()
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 Clock = pygame.time.Clock()
 Manager = pygame_gui.UIManager((WIDTH, HEIGHT))
@@ -270,18 +272,27 @@ def instructionsMenu():
 
 
 def connectionMenu():
-    ip_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((100, 275), (600, 50)),
+    tag_menu = pygame.font.Font("Assets/GlitchGoblin.ttf", 100).render("Multiplayer", True, "#b68f40")
+    menu_rect = tag_menu.get_rect(center=(390, 100))  # Center Text
+    ip_text = pygame.font.Font("Assets/GlitchGoblin.ttf", 50).render("IP", True, "#b68f40")
+    ip_rect = tag_menu.get_rect(center=(425, 300))  # Center Text
+    port_text = pygame.font.Font("Assets/GlitchGoblin.ttf", 50).render("Port", True, "#b68f40")
+    port_rect = tag_menu.get_rect(center=(350, 400))  # Center Text
+
+    ip_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((195, 250), (500, 50)),
                                                    manager=Manager, object_id="#ip_text")
-    port_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((100, 375), (600, 50)),
+    port_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((195, 350), (500, 50)),
                                                      manager=Manager, object_id="#port_text")
 
     # Creation of Connect Button
     connect_button = Button(pygame.Surface([320, 80]), (390, 500), "Connect",
                             pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
 
-    ip = -1
-    port = -1
+    ip = ""
+    port = "1"
 
+    error_font = pygame.font.Font(None, 36)  # Default font for error message
+    error_text = ""  # Initialize error message as empty string
     while True:
         UI_REFRESH_RATE = Clock.tick(60) / 1000
         for event in pygame.event.get():
@@ -294,7 +305,12 @@ def connectionMenu():
                 port = event.text
             if event.type == pygame.MOUSEBUTTONUP:
                 if connect_button.checkInput(pygame.mouse.get_pos()):
-                    print("Hi")
+                    try:
+                        s.connect((ip, int(port)))
+                        play()
+                    except (socket.error, TypeError, ConnectionError):
+                        error_text = "Invalid IP and/or Port"  # Set error message
+
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     menu()
@@ -306,6 +322,15 @@ def connectionMenu():
         screen.blit(background, (0, 0))
         connect_button.draw(screen)
         Manager.draw_ui(screen)
+
+        screen.blit(tag_menu, menu_rect)
+        screen.blit(ip_text, ip_rect)
+        screen.blit(port_text, port_rect)
+
+        if error_text:
+            error_surface = error_font.render(error_text, True, (255, 0, 0))
+            error_rect = error_surface.get_rect(midbottom=(WIDTH // 2, HEIGHT - 10))
+            screen.blit(error_surface, error_rect)
 
         pygame.display.flip()
 
