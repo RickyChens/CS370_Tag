@@ -2,6 +2,7 @@ import pygame
 import sys
 import random
 import socket
+import pickle
 import pygame_gui
 from constants import *
 from button import Button
@@ -165,6 +166,8 @@ def play():
         if keys[pygame.K_s]:
             player.move(0, dy, obstacles, player_group)
 
+        coordinates = pickle.dumps(player.rect.x, player.rect.y)
+        s.send(coordinates)
 
         # Bot Collision Detection with orb
         bot_modifier = ball.checkCircleCollision(ball, bot_group, obstacles)
@@ -353,6 +356,8 @@ def connectionMenu():
                         s.connect((ip, int(port)))
                         play()
                     except (socket.error, TypeError, ConnectionError, ValueError):
+                        print(ip)
+                        print(int(port))
                         error_text = "Invalid IP and/or Port"  # Set error message
 
             elif event.type == pygame.KEYDOWN:
