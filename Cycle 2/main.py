@@ -243,7 +243,7 @@ def play():
         screen.blit(player.image, player.rect)
 
         for i in range(23):
-            alpha = 255 / 100
+            alpha = 255 / 50
             circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
             circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
             pygame.draw.circle(circle, (0, 0, 0, int(alpha * i)), circle_center, radius * i, radius)

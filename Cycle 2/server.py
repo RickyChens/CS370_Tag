@@ -3,6 +3,9 @@ import threading
 import pickle
 from randomMap import generate_random_map
 
+random_map = generate_random_map()
+serialized_map = pickle.dumps(random_map)
+
 class Server:
     def __init__(self, host='localhost', port=5555):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -20,8 +23,13 @@ class Server:
         while True:
             try:
                 data = client.recv(1024)
-                if pickle.loads(data) == "coord":
+                serialized_data = pickle.loads(data)
+                if serialized_data == "coord":
                     print("empty")
+                elif serialized_data == "map":
+                    print("sending map")
+                    client.send(serialized_map)
+                    print("finished sending map")
                 elif data and data != "coord":
                     player_data = pickle.loads(data)
                     self.broadcast(data, client)

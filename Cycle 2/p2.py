@@ -42,10 +42,15 @@ def draw_gradient_circle(screen, player_pos):
 
 # Define the play function
 def play():
+    # Asking for Map
+    mapReq = pickle.dumps("map")
+    s.send(mapReq)
+    serialized_map = s.recv(1024)
+
     # Creating all random obstacles
     obstacles = []
     background_tiles = []
-    mapping = generate_random_map()
+    mapping = pickle.loads(serialized_map)
     for r in range(len(mapping)):
         for c in range(len(mapping[r])):
             if mapping[r][c] == 1:
@@ -169,10 +174,12 @@ def play():
         coordinates = pickle.dumps((player.rect.x, player.rect.y))
         s.send(coordinates)
 
+        coordReq = pickle.dumps("coord")
+        s.send(coordReq)
         message = s.recv(1024)
         enemy_coordinates = pickle.loads(message)
         if enemy_coordinates == "waiting":
-            pass
+            print("Waiting")
         else:
             print(enemy_coordinates)
             bot.rect.topleft = enemy_coordinates

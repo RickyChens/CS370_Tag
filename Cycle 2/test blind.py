@@ -45,7 +45,7 @@ while running:
     radius = (800-initRadius)//40
 
     for i in range(40):
-        alpha = 255/40
+        alpha = 255/50
         circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
         pygame.draw.circle(circle, (0, 0, 0, alpha*i), (player_pos[0], player_pos[1]), radius*i, radius)
         screen.blit(circle, (0, 0))
