@@ -3,59 +3,49 @@ import sys
 import random
 import socket
 import pickle
+import pygame_gui
 from constants import *
 from button import Button
 from Classes import Player, Obstacle, Modifier, Bot, Background
+from randomMap import generate_random_map
 from Raycasting import raycast
 from testing_sprite import getTile
 
-# Initializing Window
+# Initialize pygame window and necessary variables
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 screen_boundaries = pygame.Rect((0, 0), (WIDTH, HEIGHT))
 background = pygame.image.load("Assets/Background.png").convert_alpha()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+instructions = pygame.image.load("Assets/instructions.webp").convert_alpha()
 player_sheet = pygame.image.load('Assets/Dungeon_Character.png').convert_alpha()
 sprite_sheet = pygame.image.load('Assets/Dungeon_Tileset.png').convert_alpha()
 red_sprite_sheet = pygame.image.load('Assets/Dungeon_Tileset.png').convert_alpha()
 player_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 32)
 bot_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 48)
 light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
-# obstacle_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 56, 80)
 obstacle_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 56, 80)
 modifier_img = getTile(sprite_sheet, 16, 16, 2.5, BLACK, 96, 144-16)
-
-""" 
-Shitty looking graphics
-sprite_sheet = pygame.image.load('Assets/RetroSpacePNG.png').convert_alpha()
-red_sprite_sheet = pygame.image.load('Assets/RetroSpaceHell_PNG.png').convert_alpha()
-player_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 32)
-light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
-obstacle_tile = getTile(red_sprite_sheet, 16, 16, 10, BLACK, 32, 16)
-"""
-
-# Create a socket object
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# Connect to the server
-s.connect(('localhost', 5555))
 
+Clock = pygame.time.Clock()
+Manager = pygame_gui.UIManager((WIDTH, HEIGHT))
+
+# Define a function to draw the gradient circle around the player
+def draw_gradient_circle(screen, player_pos):
+    gradient_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    max_radius = 50  # Maximum radius of the gradient circle
+    for radius in range(max_radius, 0, -1):
+        alpha = int(255 * (1 - radius / max_radius))  # Calculate alpha based on distance from max_radius
+        pygame.draw.circle(gradient_surface, (0, 0, 0, alpha), player_pos, radius)
+    screen.blit(gradient_surface, (0, 0))
+
+# Define the play function
 def play():
     # Creating all random obstacles
     obstacles = []
     background_tiles = []
-
-    # Wait for the start message
-    while True:
-        message = s.recv(1024)
-        if message == b'start':
-            break
-
-    # Receive the serialized map data from the server
-    serialized_map = s.recv(1024)
-
-    # Deserialize the map data
-    mapping = pickle.loads(serialized_map)
-
+    mapping = generate_random_map()
     for r in range(len(mapping)):
         for c in range(len(mapping[r])):
             if mapping[r][c] == 1:
@@ -176,13 +166,23 @@ def play():
         if keys[pygame.K_s]:
             player.move(0, dy, obstacles, player_group)
 
+        coordinates = pickle.dumps((player.rect.x, player.rect.y))
+        s.send(coordinates)
+
+        message = s.recv(1024)
+        enemy_coordinates = pickle.loads(message)
+        if enemy_coordinates == "waiting":
+            pass
+        else:
+            print(enemy_coordinates)
+            bot.rect.topleft = enemy_coordinates
+
         # Bot Collision Detection with orb
         bot_modifier = ball.checkCircleCollision(ball, bot_group, obstacles)
         if bot_modifier == 1:
             bot.speedBuff(5)
         elif bot_modifier == 0:
             bot.SlowDebuff(5)
-        bot.move_towards_player(player.rect.topleft, obstacles, screen_boundaries)
 
         # Player Collision Detection with orb
         player_modifier = ball.checkCircleCollision(ball, player_group, obstacles)
@@ -220,6 +220,8 @@ def play():
 
         player.rect.clamp_ip(screen_boundaries)
 
+        # Draw the gradient circle around the player
+
         # Draw background
         screen.blit(background_surface, (0, 0))
 
@@ -231,10 +233,24 @@ def play():
         for obstacle in obstacles:
             screen.blit(obstacle.image, obstacle.rect)
 
+        initRadius = 100
+        radius = (800 - initRadius) // 100
+
         screen.blit(ball.image, ball.rect)
         if collision_flag[0]:
             screen.blit(bot.image, bot.rect)
         screen.blit(player.image, player.rect)
+
+        for i in range(23):
+            alpha = 255 / 100
+            circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+            circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
+            pygame.draw.circle(circle, (0, 0, 0, int(alpha * i)), circle_center, radius * i, radius)
+            screen.blit(circle, (0, 0))
+        circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
+        pygame.draw.circle(circle, (0, 0, 0, 230), circle_center, 2000, 1848)
+        screen.blit(circle, (0, 0))
 
         font = pygame.font.Font(None, 36)
         player_score_text = font.render(f'Player Score: {player_score}', True, RED)
@@ -258,55 +274,6 @@ def play():
         pygame.display.flip()
         clock.tick(60)
 
-def ready_up_menu():
-    while True:
-        screen.blit(background, (0, 0))
-        ready_up_text = pygame.font.Font("Assets/GlitchGoblin.ttf", 50).render("Ready Up", True, "#b68f40")
-        ready_up_rect = ready_up_text.get_rect(center=(390, 150))
-        screen.blit(ready_up_text, ready_up_rect)
-
-        s.sendall(b'get_clients')
-
-        # Receive the current number of clients from the server
-        current_clients = pickle.loads(s.recv(1024))
-
-        print(current_clients)
-
-        ready_button = Button(pygame.Surface([230, 80]), (390, 300), "Ready",
-                              pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-        unready_button = Button(pygame.Surface([230, 80]), (390, 400), "Unready",
-                                pygame.font.Font("Assets/GlitchGoblin.ttf", 65))  # New Unready button
-        back_button = Button(pygame.Surface([230, 80]), (390, 500), "Back",
-                             pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-
-        if ready_button.pressed:
-            pygame.draw.rect(screen, (0, 255, 0), ready_button.rect)  # Draw a green rectangle
-        ready_button.draw(screen)
-        unready_button.draw(screen)  # Draw the Unready button
-        back_button.draw(screen)
-
-        pygame.display.flip()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    menu()
-            if event.type == pygame.MOUSEBUTTONUP:
-                if ready_button.checkInput(pygame.mouse.get_pos()):
-                    if ready_button.pressed:
-                        s.sendall(b'ready')
-                if unready_button.checkInput(pygame.mouse.get_pos()):  # If Unready button is clicked
-                    s.sendall(b'unready')  # Send 'unready' message to the server
-                if back_button.checkInput(pygame.mouse.get_pos()):
-                    menu()
-        s.sendall(b'get_start')
-        status = s.recv(1024)
-
-        if status == b'start':
-            play()
 
 def winnerMenu(winner):
     while True:
@@ -344,22 +311,106 @@ def winnerMenu(winner):
                 if menu_button.checkInput(pygame.mouse.get_pos()):
                     menu()
 
+def instructionsMenu():
+    while True:
+        screen.blit(instructions, (0,0))
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    menu()
+
+
+def connectionMenu():
+    tag_menu = pygame.font.Font("Assets/GlitchGoblin.ttf", 100).render("Multiplayer", True, "#b68f40")
+    menu_rect = tag_menu.get_rect(center=(390, 100))  # Center Text
+    ip_text = pygame.font.Font("Assets/GlitchGoblin.ttf", 50).render("IP", True, "#b68f40")
+    ip_rect = tag_menu.get_rect(center=(425, 300))  # Center Text
+    port_text = pygame.font.Font("Assets/GlitchGoblin.ttf", 50).render("Port", True, "#b68f40")
+    port_rect = tag_menu.get_rect(center=(350, 400))  # Center Text
+
+    ip_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((195, 250), (500, 50)),
+                                                   manager=Manager, object_id="#ip_text")
+    port_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((195, 350), (500, 50)),
+                                                     manager=Manager, object_id="#port_text")
+
+    # Creation of Connect Button
+    connect_button = Button(pygame.Surface([320, 80]), (390, 500), "Connect",
+                            pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
+
+    ip = ""
+    port = "1"
+
+    error_font = pygame.font.Font(None, 36)  # Default font for error message
+    error_text = ""  # Initialize error message as empty string
+    while True:
+        UI_REFRESH_RATE = Clock.tick(60) / 1000
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame_gui.UI_TEXT_ENTRY_CHANGED and event.ui_object_id == "#ip_text":
+                ip = event.text
+            if event.type == pygame_gui.UI_TEXT_ENTRY_CHANGED and event.ui_object_id == "#port_text":
+                port = event.text
+            if event.type == pygame.MOUSEBUTTONUP:
+                if connect_button.checkInput(pygame.mouse.get_pos()):
+                    try:
+                        s.connect((ip, int(port)))
+                        play()
+                    except (socket.error, TypeError, ConnectionError, ValueError) as e:
+                        print(f"Error connecting: {e}")
+                        print(f"IP: {ip}, Port: {port}")
+                        error_text = "Invalid IP and/or Port"  # Set error message
+
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    menu()
+
+            Manager.process_events(event)
+
+        Manager.update(UI_REFRESH_RATE)
+
+        screen.blit(background, (0, 0))
+        connect_button.draw(screen)
+        Manager.draw_ui(screen)
+
+        screen.blit(tag_menu, menu_rect)
+        screen.blit(ip_text, ip_rect)
+        screen.blit(port_text, port_rect)
+
+        if error_text:
+            error_surface = error_font.render(error_text, True, (255, 0, 0))
+            error_rect = error_surface.get_rect(midbottom=(WIDTH // 2, HEIGHT - 10))
+            screen.blit(error_surface, error_rect)
+
+        pygame.display.flip()
 
 def menu():
     while True:
         # Background and Title Text
         screen.blit(background, (0, 0))
         tag_menu = pygame.font.Font("Assets/GlitchGoblin.ttf", 100).render("TAG", True, "#b68f40")
-        menu_rect = tag_menu.get_rect(center=(390, 150))  # Center Text
+        menu_rect = tag_menu.get_rect(center=(390, 100))  # Center Text
         screen.blit(tag_menu, menu_rect)
 
         start_button = Button(pygame.Surface([230, 80]), (390, 300), "Start",
                               pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-        quit_button = Button(pygame.Surface([230, 80]), (390, 400), "Quit",
+        quit_button = Button(pygame.Surface([230, 80]), (390, 600), "Quit",
                              pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
+        instructions_button = Button(pygame.Surface([460, 80]), (390, 400), "Instructions",
+                                     pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
+        multiplayer_button = Button(pygame.Surface([460, 80]), (390, 500), "Multiplayer",
+                                    pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
 
         start_button.draw(screen)
         quit_button.draw(screen)
+        instructions_button.draw(screen)
+        multiplayer_button.draw(screen)
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -372,7 +423,13 @@ def menu():
                     sys.exit()
             if event.type == pygame.MOUSEBUTTONUP:
                 if start_button.checkInput(pygame.mouse.get_pos()):
-                    ready_up_menu()
+                    play()
+            if event.type == pygame.MOUSEBUTTONUP:
+                if instructions_button.checkInput(pygame.mouse.get_pos()):
+                    instructionsMenu()
+            if event.type == pygame.MOUSEBUTTONUP:
+                if multiplayer_button.checkInput(pygame.mouse.get_pos()):
+                    connectionMenu()
 
 
 menu()

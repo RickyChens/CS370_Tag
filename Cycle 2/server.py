@@ -20,11 +20,13 @@ class Server:
         while True:
             try:
                 data = client.recv(1024)
-                if data:
+                if pickle.loads(data) == "coord":
+                    print("empty")
+                elif data and data != "coord":
                     player_data = pickle.loads(data)
-                    # Assuming player_data is a tuple of (x, y)
                     self.broadcast(data, client)
-                    print(data)
+                    print(player_data)
+
             except Exception as e:
                 print(f"Error: {e}")
                 self.clients.remove(client)

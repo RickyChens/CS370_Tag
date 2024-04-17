@@ -166,8 +166,16 @@ def play():
         if keys[pygame.K_s]:
             player.move(0, dy, obstacles, player_group)
 
-        coordinates = pickle.dumps(player.rect.x, player.rect.y)
+        coordinates = pickle.dumps((player.rect.x, player.rect.y))
         s.send(coordinates)
+
+        message = s.recv(1024)
+        enemy_coordinates = pickle.loads(message)
+        if enemy_coordinates == "waiting":
+            pass
+        else:
+            print(enemy_coordinates)
+            bot.rect.topleft = enemy_coordinates
 
         # Bot Collision Detection with orb
         bot_modifier = ball.checkCircleCollision(ball, bot_group, obstacles)
@@ -355,9 +363,9 @@ def connectionMenu():
                     try:
                         s.connect((ip, int(port)))
                         play()
-                    except (socket.error, TypeError, ConnectionError, ValueError):
-                        print(ip)
-                        print(int(port))
+                    except (socket.error, TypeError, ConnectionError, ValueError) as e:
+                        print(f"Error connecting: {e}")
+                        print(f"IP: {ip}, Port: {port}")
                         error_text = "Invalid IP and/or Port"  # Set error message
 
             elif event.type == pygame.KEYDOWN:
