@@ -42,10 +42,15 @@ def draw_gradient_circle(screen, player_pos):
 
 # Define the play function
 def play():
+    # Asking for Map
+    mapReq = pickle.dumps("map")
+    s.send(mapReq)
+    serialized_map = s.recv(1024)
+
     # Creating all random obstacles
     obstacles = []
     background_tiles = []
-    mapping = generate_random_map()
+    mapping = pickle.loads(serialized_map)
     for r in range(len(mapping)):
         for c in range(len(mapping[r])):
             if mapping[r][c] == 1:
@@ -122,6 +127,16 @@ def play():
     tagged_time = 0
     time_tracker = 0
 
+    initRadius = 100
+    radius = (800 - initRadius) // 100
+    circle_surface = pygame.Surface((radius * 23 * 2, radius * 23 * 2), pygame.SRCALPHA)
+    for i in range(23):
+        alpha = 255 / 100
+        circle = pygame.Surface((radius * 23 * 2, radius * 23 * 2), pygame.SRCALPHA)
+        circle_center = (radius * 23, radius * 23)
+        pygame.draw.circle(circle, (0, 0, 0, int(alpha * i)), circle_center, radius * i, radius)
+        circle_surface.blit(circle, (0, 0))
+
     clock = pygame.time.Clock()
 
     running = True
@@ -169,10 +184,12 @@ def play():
         coordinates = pickle.dumps((player.rect.x, player.rect.y))
         s.send(coordinates)
 
+        coordReq = pickle.dumps("coord")
+        s.send(coordReq)
         message = s.recv(1024)
         enemy_coordinates = pickle.loads(message)
         if enemy_coordinates == "waiting":
-            pass
+            print("Waiting")
         else:
             print(enemy_coordinates)
             bot.rect.topleft = enemy_coordinates
@@ -183,7 +200,6 @@ def play():
             bot.speedBuff(5)
         elif bot_modifier == 0:
             bot.SlowDebuff(5)
-        bot.move_towards_player(player.rect.topleft, obstacles, screen_boundaries)
 
         # Player Collision Detection with orb
         player_modifier = ball.checkCircleCollision(ball, player_group, obstacles)
@@ -234,23 +250,15 @@ def play():
         for obstacle in obstacles:
             screen.blit(obstacle.image, obstacle.rect)
 
-        initRadius = 100
-        radius = (800 - initRadius) // 100
-
         screen.blit(ball.image, ball.rect)
         if collision_flag[0]:
             screen.blit(bot.image, bot.rect)
         screen.blit(player.image, player.rect)
 
-        for i in range(23):
-            alpha = 255 / 50
-            circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-            circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
-            pygame.draw.circle(circle, (0, 0, 0, int(alpha * i)), circle_center, radius * i, radius)
-            screen.blit(circle, (0, 0))
         circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
         circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
         pygame.draw.circle(circle, (0, 0, 0, 230), circle_center, 2000, 1848)
+        screen.blit(circle_surface, (player.rect.x - 143, player.rect.y - 143))
         screen.blit(circle, (0, 0))
 
         font = pygame.font.Font(None, 36)

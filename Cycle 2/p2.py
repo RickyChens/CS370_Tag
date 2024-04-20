@@ -127,6 +127,16 @@ def play():
     tagged_time = 0
     time_tracker = 0
 
+    initRadius = 100
+    radius = (800 - initRadius) // 100
+    circle_surface = pygame.Surface((radius * 23 * 2, radius * 23 * 2), pygame.SRCALPHA)
+    for i in range(23):
+        alpha = 255 / 100
+        circle = pygame.Surface((radius * 23 * 2, radius * 23 * 2), pygame.SRCALPHA)
+        circle_center = (radius * 23, radius * 23)
+        pygame.draw.circle(circle, (0, 0, 0, int(alpha * i)), circle_center, radius * i, radius)
+        circle_surface.blit(circle, (0, 0))
+
     clock = pygame.time.Clock()
 
     running = True
@@ -240,23 +250,15 @@ def play():
         for obstacle in obstacles:
             screen.blit(obstacle.image, obstacle.rect)
 
-        initRadius = 100
-        radius = (800 - initRadius) // 100
-
         screen.blit(ball.image, ball.rect)
         if collision_flag[0]:
             screen.blit(bot.image, bot.rect)
         screen.blit(player.image, player.rect)
 
-        for i in range(23):
-            alpha = 255 / 100
-            circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-            circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
-            pygame.draw.circle(circle, (0, 0, 0, int(alpha * i)), circle_center, radius * i, radius)
-            screen.blit(circle, (0, 0))
         circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
         circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
         pygame.draw.circle(circle, (0, 0, 0, 230), circle_center, 2000, 1848)
+        screen.blit(circle_surface, (player.rect.x - 143, player.rect.y - 143))
         screen.blit(circle, (0, 0))
 
         font = pygame.font.Font(None, 36)
