@@ -73,6 +73,9 @@ def adjust_sound_volume(volume):
 
 # Define the play function
 def play():
+    pygame.mixer.music.stop()  # Stop the music when the game starts
+    start_gameplay_music()
+
     # Asking for Map4
     mapReq = pickle.dumps("map")
     s.send(mapReq)
