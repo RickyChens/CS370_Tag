@@ -23,6 +23,27 @@ light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
 obstacle_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 56, 80)
 modifier_img = getTile(sprite_sheet, 16, 16, 2.5, BLACK, 96, 144-16)
 
+# Load and play start music
+pygame.mixer.music.load("Startmusic.wav")
+pygame.mixer.music.play(-1)  # -1 means play on loop
+
+# Load the sound for acquiring the orb
+powerup_sound = pygame.mixer.Sound("Powerup.wav")
+tagsound = pygame.mixer.Sound("Tagsound.wav")
+
+# Define a function to start gameplay music
+def start_gameplay_music():
+    pygame.mixer.music.load("Gameplaymusic.wav")
+    pygame.mixer.music.play(-1)
+
+# Define the function to play the powerup sound
+def play_powerup_sound():
+    powerup_sound.play()
+
+# Define the function to play the tagsound
+def play_tagsound():
+    tagsound.play()
+
 # Define a function to draw the gradient circle around the player
 def draw_gradient_circle(screen, player_pos):
     gradient_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
@@ -34,6 +55,8 @@ def draw_gradient_circle(screen, player_pos):
 
 # Define the play function
 def play():
+    pygame.mixer.music.stop()  # Stop the music when the game starts
+    start_gameplay_music()  # Start gameplay music
     # Creating all random obstacles
     obstacles = []
     background_tiles = []
@@ -84,7 +107,7 @@ def play():
             ball.rect.topleft = (x, y)
             break
 
-        # Initialize the bot
+    # Initialize the bot
     bot = Bot((100, 100), bot_image)
     bot_group = pygame.sprite.Group()
     bot_group.add(bot)
@@ -129,6 +152,14 @@ def play():
                     turn_left = True
                 elif event.key == pygame.K_RIGHT:
                     turn_right = True
+                elif event.key == pygame.K_a:  # <-- 'a' key for moving left
+                    player.move(-dx, 0, obstacles, player_group)
+                elif event.key == pygame.K_d:  # <-- 'd' key for moving right
+                    player.move(dx, 0, obstacles, player_group)
+                elif event.key == pygame.K_w:  # <-- 'w' key for moving up
+                    player.move(0, -dy, obstacles, player_group)
+                elif event.key == pygame.K_s:  # <-- 's' key for moving down
+                    player.move(0, dy, obstacles, player_group)
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
                     turn_left = False
@@ -148,16 +179,6 @@ def play():
 
         dx = 5 + player.speed_modifier
         dy = 5 + player.speed_modifier
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:
-            player.move(-dx, 0, obstacles, player_group)
-        if keys[pygame.K_d]:
-            player.move(dx, 0, obstacles, player_group)
-        if keys[pygame.K_w]:
-            player.move(0, -dy, obstacles, player_group)
-        if keys[pygame.K_s]:
-            player.move(0, dy, obstacles, player_group)
-
 
         # Bot Collision Detection with orb
         bot_modifier = ball.checkCircleCollision(ball, bot_group, obstacles)
@@ -171,8 +192,10 @@ def play():
         player_modifier = ball.checkCircleCollision(ball, player_group, obstacles)
         if player_modifier == 1:
             player.speedBuff(5)
+            play_powerup_sound()  # Play powerup sound when orb is acquired
         elif player_modifier == 0:
             player.SlowDebuff(5)
+            play_powerup_sound()
 
         # Player bot collision detection
         if pygame.sprite.spritecollide(bot, player_group, False, pygame.sprite.collide_mask):
@@ -182,11 +205,13 @@ def play():
                 tag_cooldown = 3
                 bot.setIsTagged(True)
                 player.setIsTagged(False)
+                play_tagsound()  # Play tagsound when tag is made
             elif bot.getIsTagged() and tag_cooldown <= 0:
                 tagged_time = 0
                 tag_cooldown = 3
                 player.setIsTagged(True)
                 bot.setIsTagged(False)
+                play_tagsound()  # Play tagsound when tag is made
 
         time_tracker += 1
         if time_tracker % 60 == 1:
@@ -247,7 +272,7 @@ def play():
         screen.blit(bot_score_text, (WIDTH - 150, 10))
 
         # Game ending
-        if time_tracker / 60 >= 120: # If the time is more than 120 seconds
+        if time_tracker / 60 >= 120:  # If the time is more than 120 seconds
             if player_score > bot_score:
                 winnerMenu("player")
             elif bot_score > player_score:
@@ -290,12 +315,13 @@ def winnerMenu(winner):
             if event.type == pygame.MOUSEBUTTONUP:
                 if restart_button.checkInput(pygame.mouse.get_pos()):
                     play()
-            if event.type == pygame.MOUSEBUTTONUP:
                 if menu_button.checkInput(pygame.mouse.get_pos()):
                     menu()
 
 
 def menu():
+    pygame.mixer.music.load("Startmusic.wav")  # Load the start music
+    pygame.mixer.music.play(-1)  # Play the start music on loop
     while True:
         # Background and Title Text
         screen.blit(background, (0, 0))
@@ -320,7 +346,6 @@ def menu():
                 if quit_button.checkInput(pygame.mouse.get_pos()):
                     pygame.quit()
                     sys.exit()
-            if event.type == pygame.MOUSEBUTTONUP:
                 if start_button.checkInput(pygame.mouse.get_pos()):
                     play()
 
