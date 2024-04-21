@@ -1,9 +1,6 @@
 import pygame
 import sys
 import random
-import socket
-import pickle
-import pygame_gui
 from constants import *
 from button import Button
 from Classes import Player, Obstacle, Modifier, Bot, Background
@@ -17,7 +14,6 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 screen_boundaries = pygame.Rect((0, 0), (WIDTH, HEIGHT))
 background = pygame.image.load("Assets/Background.png").convert_alpha()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-instructions = pygame.image.load("Assets/instructions.webp").convert_alpha()
 player_sheet = pygame.image.load('Assets/Dungeon_Character.png').convert_alpha()
 sprite_sheet = pygame.image.load('Assets/Dungeon_Tileset.png').convert_alpha()
 red_sprite_sheet = pygame.image.load('Assets/Dungeon_Tileset.png').convert_alpha()
@@ -26,10 +22,27 @@ bot_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 48)
 light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
 obstacle_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 56, 80)
 modifier_img = getTile(sprite_sheet, 16, 16, 2.5, BLACK, 96, 144-16)
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-Clock = pygame.time.Clock()
-Manager = pygame_gui.UIManager((WIDTH, HEIGHT))
+# Load and play start music
+pygame.mixer.music.load("Startmusic.wav")
+pygame.mixer.music.play(-1)  # -1 means play on loop
+
+# Load the sound for acquiring the orb
+powerup_sound = pygame.mixer.Sound("Powerup.wav")
+tagsound = pygame.mixer.Sound("Tagsound.wav")
+
+# Define a function to start gameplay music
+def start_gameplay_music():
+    pygame.mixer.music.load("Gameplaymusic.wav")
+    pygame.mixer.music.play(-1)
+
+# Define the function to play the powerup sound
+def play_powerup_sound():
+    powerup_sound.play()
+
+# Define the function to play the tagsound
+def play_tagsound():
+    tagsound.play()
 
 # Define a function to draw the gradient circle around the player
 def draw_gradient_circle(screen, player_pos):
@@ -42,6 +55,8 @@ def draw_gradient_circle(screen, player_pos):
 
 # Define the play function
 def play():
+    pygame.mixer.music.stop()  # Stop the music when the game starts
+    start_gameplay_music()  # Start gameplay music
     # Creating all random obstacles
     obstacles = []
     background_tiles = []
@@ -92,7 +107,7 @@ def play():
             ball.rect.topleft = (x, y)
             break
 
-        # Initialize the bot
+    # Initialize the bot
     bot = Bot((100, 100), bot_image)
     bot_group = pygame.sprite.Group()
     bot_group.add(bot)
@@ -137,6 +152,14 @@ def play():
                     turn_left = True
                 elif event.key == pygame.K_RIGHT:
                     turn_right = True
+                elif event.key == pygame.K_a:  # <-- 'a' key for moving left
+                    player.move(-dx, 0, obstacles, player_group)
+                elif event.key == pygame.K_d:  # <-- 'd' key for moving right
+                    player.move(dx, 0, obstacles, player_group)
+                elif event.key == pygame.K_w:  # <-- 'w' key for moving up
+                    player.move(0, -dy, obstacles, player_group)
+                elif event.key == pygame.K_s:  # <-- 's' key for moving down
+                    player.move(0, dy, obstacles, player_group)
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
                     turn_left = False
@@ -156,26 +179,6 @@ def play():
 
         dx = 5 + player.speed_modifier
         dy = 5 + player.speed_modifier
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:
-            player.move(-dx, 0, obstacles, player_group)
-        if keys[pygame.K_d]:
-            player.move(dx, 0, obstacles, player_group)
-        if keys[pygame.K_w]:
-            player.move(0, -dy, obstacles, player_group)
-        if keys[pygame.K_s]:
-            player.move(0, dy, obstacles, player_group)
-
-        coordinates = pickle.dumps((player.rect.x, player.rect.y))
-        s.send(coordinates)
-
-        message = s.recv(1024)
-        enemy_coordinates = pickle.loads(message)
-        if enemy_coordinates == "waiting":
-            pass
-        else:
-            print(enemy_coordinates)
-            bot.rect.topleft = enemy_coordinates
 
         # Bot Collision Detection with orb
         bot_modifier = ball.checkCircleCollision(ball, bot_group, obstacles)
@@ -189,8 +192,10 @@ def play():
         player_modifier = ball.checkCircleCollision(ball, player_group, obstacles)
         if player_modifier == 1:
             player.speedBuff(5)
+            play_powerup_sound()  # Play powerup sound when orb is acquired
         elif player_modifier == 0:
             player.SlowDebuff(5)
+            play_powerup_sound()
 
         # Player bot collision detection
         if pygame.sprite.spritecollide(bot, player_group, False, pygame.sprite.collide_mask):
@@ -200,11 +205,13 @@ def play():
                 tag_cooldown = 3
                 bot.setIsTagged(True)
                 player.setIsTagged(False)
+                play_tagsound()  # Play tagsound when tag is made
             elif bot.getIsTagged() and tag_cooldown <= 0:
                 tagged_time = 0
                 tag_cooldown = 3
                 player.setIsTagged(True)
                 bot.setIsTagged(False)
+                play_tagsound()  # Play tagsound when tag is made
 
         time_tracker += 1
         if time_tracker % 60 == 1:
@@ -237,13 +244,8 @@ def play():
         initRadius = 100
         radius = (800 - initRadius) // 100
 
-        screen.blit(ball.image, ball.rect)
-        if collision_flag[0]:
-            screen.blit(bot.image, bot.rect)
-        screen.blit(player.image, player.rect)
-
         for i in range(23):
-            alpha = 255 / 50
+            alpha = 255 / 100
             circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
             circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
             pygame.draw.circle(circle, (0, 0, 0, int(alpha * i)), circle_center, radius * i, radius)
@@ -252,6 +254,11 @@ def play():
         circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
         pygame.draw.circle(circle, (0, 0, 0, 230), circle_center, 2000, 1848)
         screen.blit(circle, (0, 0))
+
+        screen.blit(ball.image, ball.rect)
+        if collision_flag[0]:
+            screen.blit(bot.image, bot.rect)
+        screen.blit(player.image, player.rect)
 
         font = pygame.font.Font(None, 36)
         player_score_text = font.render(f'Player Score: {player_score}', True, RED)
@@ -265,7 +272,7 @@ def play():
         screen.blit(bot_score_text, (WIDTH - 150, 10))
 
         # Game ending
-        if time_tracker / 60 >= 120: # If the time is more than 120 seconds
+        if time_tracker / 60 >= 120:  # If the time is more than 120 seconds
             if player_score > bot_score:
                 winnerMenu("player")
             elif bot_score > player_score:
@@ -308,110 +315,27 @@ def winnerMenu(winner):
             if event.type == pygame.MOUSEBUTTONUP:
                 if restart_button.checkInput(pygame.mouse.get_pos()):
                     play()
-            if event.type == pygame.MOUSEBUTTONUP:
                 if menu_button.checkInput(pygame.mouse.get_pos()):
                     menu()
 
-def instructionsMenu():
-    while True:
-        screen.blit(instructions, (0,0))
-        pygame.display.flip()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    menu()
-
-
-def connectionMenu():
-    tag_menu = pygame.font.Font("Assets/GlitchGoblin.ttf", 100).render("Multiplayer", True, "#b68f40")
-    menu_rect = tag_menu.get_rect(center=(390, 100))  # Center Text
-    ip_text = pygame.font.Font("Assets/GlitchGoblin.ttf", 50).render("IP", True, "#b68f40")
-    ip_rect = tag_menu.get_rect(center=(425, 300))  # Center Text
-    port_text = pygame.font.Font("Assets/GlitchGoblin.ttf", 50).render("Port", True, "#b68f40")
-    port_rect = tag_menu.get_rect(center=(350, 400))  # Center Text
-
-    ip_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((195, 250), (500, 50)),
-                                                   manager=Manager, object_id="#ip_text")
-    port_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((195, 350), (500, 50)),
-                                                     manager=Manager, object_id="#port_text")
-
-    # Creation of Connect Button
-    connect_button = Button(pygame.Surface([320, 80]), (390, 500), "Connect",
-                            pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-
-    ip = ""
-    port = "1"
-
-    error_font = pygame.font.Font(None, 36)  # Default font for error message
-    error_text = ""  # Initialize error message as empty string
-    while True:
-        UI_REFRESH_RATE = Clock.tick(60) / 1000
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame_gui.UI_TEXT_ENTRY_CHANGED and event.ui_object_id == "#ip_text":
-                ip = event.text
-            if event.type == pygame_gui.UI_TEXT_ENTRY_CHANGED and event.ui_object_id == "#port_text":
-                port = event.text
-            if event.type == pygame.MOUSEBUTTONUP:
-                if connect_button.checkInput(pygame.mouse.get_pos()):
-                    try:
-                        s.connect((ip, int(port)))
-                        play()
-                    except (socket.error, TypeError, ConnectionError, ValueError) as e:
-                        print(f"Error connecting: {e}")
-                        print(f"IP: {ip}, Port: {port}")
-                        error_text = "Invalid IP and/or Port"  # Set error message
-
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    menu()
-
-            Manager.process_events(event)
-
-        Manager.update(UI_REFRESH_RATE)
-
-        screen.blit(background, (0, 0))
-        connect_button.draw(screen)
-        Manager.draw_ui(screen)
-
-        screen.blit(tag_menu, menu_rect)
-        screen.blit(ip_text, ip_rect)
-        screen.blit(port_text, port_rect)
-
-        if error_text:
-            error_surface = error_font.render(error_text, True, (255, 0, 0))
-            error_rect = error_surface.get_rect(midbottom=(WIDTH // 2, HEIGHT - 10))
-            screen.blit(error_surface, error_rect)
-
-        pygame.display.flip()
 
 def menu():
+    pygame.mixer.music.load("Startmusic.wav")  # Load the start music
+    pygame.mixer.music.play(-1)  # Play the start music on loop
     while True:
         # Background and Title Text
         screen.blit(background, (0, 0))
         tag_menu = pygame.font.Font("Assets/GlitchGoblin.ttf", 100).render("TAG", True, "#b68f40")
-        menu_rect = tag_menu.get_rect(center=(390, 100))  # Center Text
+        menu_rect = tag_menu.get_rect(center=(390, 150))  # Center Text
         screen.blit(tag_menu, menu_rect)
 
         start_button = Button(pygame.Surface([230, 80]), (390, 300), "Start",
                               pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-        quit_button = Button(pygame.Surface([230, 80]), (390, 600), "Quit",
+        quit_button = Button(pygame.Surface([230, 80]), (390, 400), "Quit",
                              pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-        instructions_button = Button(pygame.Surface([460, 80]), (390, 400), "Instructions",
-                                     pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-        multiplayer_button = Button(pygame.Surface([460, 80]), (390, 500), "Multiplayer",
-                                    pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
 
         start_button.draw(screen)
         quit_button.draw(screen)
-        instructions_button.draw(screen)
-        multiplayer_button.draw(screen)
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -422,15 +346,8 @@ def menu():
                 if quit_button.checkInput(pygame.mouse.get_pos()):
                     pygame.quit()
                     sys.exit()
-            if event.type == pygame.MOUSEBUTTONUP:
                 if start_button.checkInput(pygame.mouse.get_pos()):
                     play()
-            if event.type == pygame.MOUSEBUTTONUP:
-                if instructions_button.checkInput(pygame.mouse.get_pos()):
-                    instructionsMenu()
-            if event.type == pygame.MOUSEBUTTONUP:
-                if multiplayer_button.checkInput(pygame.mouse.get_pos()):
-                    connectionMenu()
 
 
 menu()

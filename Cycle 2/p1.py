@@ -31,6 +31,39 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 Clock = pygame.time.Clock()
 Manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
+pygame.mixer.music.load("Startmusic.wav")
+pygame.mixer.music.play(-1)  # -1 means play on loop
+pygame.mixer.music.set_volume(0.5)  # Set initial music volume
+
+# Load the sound for acquiring the orb
+powerup_sound = pygame.mixer.Sound("Powerup.wav")
+tagsound = pygame.mixer.Sound("Tagsound.wav")
+
+# Define a function to start gameplay music
+def start_gameplay_music():
+    pygame.mixer.music.load("Gameplaymusic.wav")
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(0.5)  # Adjust the volume as needed
+
+# Define the function to play the powerup sound
+def play_powerup_sound():
+    powerup_sound.play()
+    powerup_sound.set_volume(0.5)  # Adjust the volume as needed
+
+# Define the function to play the tagsound
+def play_tagsound():
+    tagsound.play()
+    tagsound.set_volume(0.5)  # Adjust the volume as needed
+
+# Define a function to adjust the music volume
+def adjust_music_volume(volume):
+    pygame.mixer.music.set_volume(volume)
+
+# Define a function to adjust the sound effects volume
+def adjust_sound_volume(volume):
+    powerup_sound.set_volume(volume)
+    tagsound.set_volume(volume)
+
 # Define a function to draw the gradient circle around the player
 def draw_gradient_circle(screen, player_pos):
     gradient_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
@@ -42,6 +75,8 @@ def draw_gradient_circle(screen, player_pos):
 
 # Define the play function
 def play():
+    pygame.mixer.music.stop()  # Stop the music when the game starts
+    start_gameplay_music()  # Start gameplay music
     # Asking for Map
     mapReq = pickle.dumps("map")
     s.send(mapReq)
@@ -188,15 +223,19 @@ def play():
         bot_modifier = ball.checkCircleCollision(ball, bot_group, obstacles)
         if bot_modifier == 1:
             bot.speedBuff(5)
+            play_powerup_sound()
         elif bot_modifier == 0:
             bot.SlowDebuff(5)
+            play_powerup_sound()
 
         # Player Collision Detection with orb
         player_modifier = ball.checkCircleCollision(ball, player_group, obstacles)
         if player_modifier == 1:
             player.speedBuff(5)
+            play_powerup_sound()
         elif player_modifier == 0:
             player.SlowDebuff(5)
+            play_powerup_sound()
 
         # Player bot collision detection
         if pygame.sprite.spritecollide(bot, player_group, False, pygame.sprite.collide_mask):
@@ -206,11 +245,13 @@ def play():
                 tag_cooldown = 3
                 bot.setIsTagged(True)
                 player.setIsTagged(False)
+                play_tagsound()  # Play tagsound when tag is made
             elif bot.getIsTagged() and tag_cooldown <= 0:
                 tagged_time = 0
                 tag_cooldown = 3
                 player.setIsTagged(True)
                 bot.setIsTagged(False)
+                play_tagsound()  # Play tagsound when tag is made
 
         time_tracker += 1
         if time_tracker % 60 == 1:
@@ -398,6 +439,8 @@ def connectionMenu():
         pygame.display.flip()
 
 def menu():
+    pygame.mixer.music.load("Startmusic.wav")  # Load the start music
+    pygame.mixer.music.play(-1)  # Play the start music on loop
     while True:
         # Background and Title Text
         screen.blit(background, (0, 0))
