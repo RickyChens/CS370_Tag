@@ -32,32 +32,32 @@ ip_address = socket.gethostbyname(hostname)
 Clock = pygame.time.Clock()
 Manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
-pygame.mixer.music.load("Startmusic.wav")
+pygame.mixer.music.load("Assets/Startmusic.wav")
 pygame.mixer.music.play(-1)  # -1 means play on loop
-pygame.mixer.music.set_volume(0.5)  # Set initial music volume
+pygame.mixer.music.set_volume(0.25)  # Set initial music volume
 
 # Load the sound for acquiring the orb
-powerup_sound = pygame.mixer.Sound("Powerup.wav")
-tagsound = pygame.mixer.Sound("Tagsound.wav")
+powerup_sound = pygame.mixer.Sound("Assets/Powerup.wav")
+tagsound = pygame.mixer.Sound("Assets/Tagsound.wav")
 
 
 # Define a function to start gameplay music
 def start_gameplay_music():
-    pygame.mixer.music.load("Gameplaymusic.wav")
+    pygame.mixer.music.load("Assets/Gameplaymusic.wav")
     pygame.mixer.music.play(-1)
-    pygame.mixer.music.set_volume(0.5)  # Adjust the volume as needed
+    pygame.mixer.music.set_volume(0.25)  # Adjust the volume as needed
 
 
 # Define the function to play the powerup sound
 def play_powerup_sound():
     powerup_sound.play()
-    powerup_sound.set_volume(0.5)  # Adjust the volume as needed
+    powerup_sound.set_volume(0.4)  # Adjust the volume as needed
 
 
 # Define the function to play the tagsound
 def play_tagsound():
     tagsound.play()
-    tagsound.set_volume(0.5)  # Adjust the volume as needed
+    tagsound.set_volume(0.4)  # Adjust the volume as needed
 
 
 # Define a function to adjust the music volume
@@ -459,7 +459,7 @@ def hostScreen():
 
 
 def menu():
-    pygame.mixer.music.load("Startmusic.wav")  # Load the start music
+    pygame.mixer.music.load("Assets/Startmusic.wav")  # Load the start music
     pygame.mixer.music.play(-1)  # Play the start music on loop
     while True:
         # Background and Title Text
