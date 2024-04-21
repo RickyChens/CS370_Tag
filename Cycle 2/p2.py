@@ -24,7 +24,7 @@ player_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 32)
 bot_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 48)
 light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
 obstacle_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 56, 80)
-modifier_img = getTile(sprite_sheet, 16, 16, 2.5, BLACK, 96, 144-16)
+modifier_img = getTile(sprite_sheet, 16, 16, 2.5, BLACK, 96, 144 - 16)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 hostname = socket.gethostname()
 ip_address = socket.gethostbyname(hostname)
@@ -32,9 +32,50 @@ ip_address = socket.gethostbyname(hostname)
 Clock = pygame.time.Clock()
 Manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
+pygame.mixer.music.load("Assets/Startmusic.wav")
+pygame.mixer.music.play(-1)  # -1 means play on loop
+pygame.mixer.music.set_volume(0.25)  # Set initial music volume
+
+# Load the sound for acquiring the orb
+powerup_sound = pygame.mixer.Sound("Assets/Powerup.wav")
+tagsound = pygame.mixer.Sound("Assets/Tagsound.wav")
+
+
+# Define a function to start gameplay music
+def start_gameplay_music():
+    pygame.mixer.music.load("Assets/Gameplaymusic.wav")
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(0.25)  # Adjust the volume as needed
+
+
+# Define the function to play the powerup sound
+def play_powerup_sound():
+    powerup_sound.play()
+    powerup_sound.set_volume(0.4)  # Adjust the volume as needed
+
+
+# Define the function to play the tagsound
+def play_tagsound():
+    tagsound.play()
+    tagsound.set_volume(0.4)  # Adjust the volume as needed
+
+
+# Define a function to adjust the music volume
+def adjust_music_volume(volume):
+    pygame.mixer.music.set_volume(volume)
+
+
+# Define a function to adjust the sound effects volume
+def adjust_sound_volume(volume):
+    powerup_sound.set_volume(volume)
+    tagsound.set_volume(volume)
+
 
 # Define the play function
 def play():
+    pygame.mixer.music.stop()  # Stop the music when the game starts
+    start_gameplay_music()
+
     # Asking for Map
     mapReq = pickle.dumps("map")
     s.send(mapReq)
@@ -182,7 +223,7 @@ def play():
         message = s.recv(1024)
         enemy_coordinates = pickle.loads(message)
         if enemy_coordinates == "game finished":
-          pass
+            pass
         elif enemy_coordinates == "waiting":
             print("Waiting")
         else:
@@ -193,15 +234,19 @@ def play():
         bot_modifier = ball.checkCircleCollision(ball, bot_group, obstacles)
         if bot_modifier == 1:
             bot.speedBuff(5)
+            play_powerup_sound()
         elif bot_modifier == 0:
             bot.SlowDebuff(5)
+            play_powerup_sound()
 
         # Player Collision Detection with orb
         player_modifier = ball.checkCircleCollision(ball, player_group, obstacles)
         if player_modifier == 1:
             player.speedBuff(5)
+            play_powerup_sound()
         elif player_modifier == 0:
             player.SlowDebuff(5)
+            play_powerup_sound()
 
         # Player bot collision detection
         if pygame.sprite.spritecollide(bot, player_group, False, pygame.sprite.collide_mask):
@@ -211,11 +256,13 @@ def play():
                 tag_cooldown = 3
                 bot.setIsTagged(True)
                 player.setIsTagged(False)
+                play_tagsound()
             elif bot.getIsTagged() and tag_cooldown <= 0:
                 tagged_time = 0
                 tag_cooldown = 3
                 player.setIsTagged(True)
                 bot.setIsTagged(False)
+                play_tagsound()
 
         time_tracker += 1
         if time_tracker % 60 == 1:
@@ -268,7 +315,7 @@ def play():
         screen.blit(bot_score_text, (WIDTH - 150, 10))
 
         # Game ending
-        if time_tracker / 60 >= 5: # If the time is more than 120 seconds
+        if time_tracker / 60 >= 120:  # If the time is more than 120 seconds
             if player_score > bot_score:
                 winnerMenu("player")
             elif bot_score > player_score:
@@ -315,9 +362,10 @@ def winnerMenu(winner):
                 if menu_button.checkInput(pygame.mouse.get_pos()):
                     menu()
 
+
 def instructionsMenu():
     while True:
-        screen.blit(instructions, (0,0))
+        screen.blit(instructions, (0, 0))
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -415,7 +463,10 @@ def hostScreen():
 
         pygame.display.flip()
 
+
 def menu():
+    pygame.mixer.music.load("Assets/Startmusic.wav")  # Load the start music
+    pygame.mixer.music.play(-1)  # Play the start music on loop
     while True:
         # Background and Title Text
         screen.blit(background, (0, 0))
@@ -424,7 +475,7 @@ def menu():
         screen.blit(tag_menu, menu_rect)
 
         host_button = Button(pygame.Surface([230, 80]), (390, 300), "Host",
-                              pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
+                             pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
         quit_button = Button(pygame.Surface([230, 80]), (390, 600), "Quit",
                              pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
         instructions_button = Button(pygame.Surface([460, 80]), (390, 400), "Instructions",

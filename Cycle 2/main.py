@@ -76,7 +76,7 @@ def play():
     pygame.mixer.music.stop()  # Stop the music when the game starts
     start_gameplay_music()
 
-    # Asking for Map4
+    # Asking for Map
     mapReq = pickle.dumps("map")
     s.send(mapReq)
     serialized_map = s.recv(1024)
@@ -234,15 +234,19 @@ def play():
         bot_modifier = ball.checkCircleCollision(ball, bot_group, obstacles)
         if bot_modifier == 1:
             bot.speedBuff(5)
+            play_powerup_sound()
         elif bot_modifier == 0:
             bot.SlowDebuff(5)
+            play_powerup_sound()
 
         # Player Collision Detection with orb
         player_modifier = ball.checkCircleCollision(ball, player_group, obstacles)
         if player_modifier == 1:
             player.speedBuff(5)
+            play_powerup_sound()
         elif player_modifier == 0:
             player.SlowDebuff(5)
+            play_powerup_sound()
 
         # Player bot collision detection
         if pygame.sprite.spritecollide(bot, player_group, False, pygame.sprite.collide_mask):
@@ -252,11 +256,13 @@ def play():
                 tag_cooldown = 3
                 bot.setIsTagged(True)
                 player.setIsTagged(False)
+                play_tagsound()
             elif bot.getIsTagged() and tag_cooldown <= 0:
                 tagged_time = 0
                 tag_cooldown = 3
                 player.setIsTagged(True)
                 bot.setIsTagged(False)
+                play_tagsound()
 
         time_tracker += 1
         if time_tracker % 60 == 1:
@@ -309,7 +315,7 @@ def play():
         screen.blit(bot_score_text, (WIDTH - 150, 10))
 
         # Game ending
-        if time_tracker / 60 >= 5:  # If the time is more than 120 seconds
+        if time_tracker / 60 >= 120:  # If the time is more than 120 seconds
             if player_score > bot_score:
                 winnerMenu("player")
             elif bot_score > player_score:
