@@ -459,6 +459,8 @@ def hostScreen():
 
 
 def menu():
+    pygame.mixer.music.load("Startmusic.wav")  # Load the start music
+    pygame.mixer.music.play(-1)  # Play the start music on loop
     while True:
         # Background and Title Text
         screen.blit(background, (0, 0))
