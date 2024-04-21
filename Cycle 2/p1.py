@@ -31,14 +31,6 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 Clock = pygame.time.Clock()
 Manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
-# Define a function to draw the gradient circle around the player
-def draw_gradient_circle(screen, player_pos):
-    gradient_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-    max_radius = 50  # Maximum radius of the gradient circle
-    for radius in range(max_radius, 0, -1):
-        alpha = int(255 * (1 - radius / max_radius))  # Calculate alpha based on distance from max_radius
-        pygame.draw.circle(gradient_surface, (0, 0, 0, alpha), player_pos, radius)
-    screen.blit(gradient_surface, (0, 0))
 
 # Define the play function
 def play():
@@ -126,6 +118,16 @@ def play():
     tag_cooldown = 3
     tagged_time = 0
     time_tracker = 0
+
+    initRadius = 100
+    radius = (800 - initRadius) // 100
+    circle_surface = pygame.Surface((radius * 23 * 2, radius * 23 * 2), pygame.SRCALPHA)
+    for i in range(23):
+        alpha = 255 / 100
+        circle = pygame.Surface((radius * 23 * 2, radius * 23 * 2), pygame.SRCALPHA)
+        circle_center = (radius * 23, radius * 23)
+        pygame.draw.circle(circle, (0, 0, 0, int(alpha * i)), circle_center, radius * i, radius)
+        circle_surface.blit(circle, (0, 0))
 
     clock = pygame.time.Clock()
 
@@ -240,23 +242,15 @@ def play():
         for obstacle in obstacles:
             screen.blit(obstacle.image, obstacle.rect)
 
-        initRadius = 100
-        radius = (800 - initRadius) // 100
-
         screen.blit(ball.image, ball.rect)
         if collision_flag[0]:
             screen.blit(bot.image, bot.rect)
         screen.blit(player.image, player.rect)
 
-        for i in range(23):
-            alpha = 255 / 100
-            circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-            circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
-            pygame.draw.circle(circle, (0, 0, 0, int(alpha * i)), circle_center, radius * i, radius)
-            screen.blit(circle, (0, 0))
         circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
         circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
         pygame.draw.circle(circle, (0, 0, 0, 230), circle_center, 2000, 1848)
+        screen.blit(circle_surface, (player.rect.x - 143, player.rect.y - 143))
         screen.blit(circle, (0, 0))
 
         font = pygame.font.Font(None, 36)

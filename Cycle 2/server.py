@@ -6,8 +6,11 @@ from randomMap import generate_random_map
 random_map = generate_random_map()
 serialized_map = pickle.dumps(random_map)
 
+hostname = socket.gethostname()
+ip_address = socket.gethostbyname(hostname)
+
 class Server:
-    def __init__(self, host='localhost', port=5555):
+    def __init__(self, host=ip_address, port=6666):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind((host, port))
         self.server.listen()
@@ -30,6 +33,9 @@ class Server:
                     print("sending map")
                     client.send(serialized_map)
                     print("finished sending map")
+                elif serialized_data == "game finished":
+                    finished = pickle.dumps("finished")
+                    client.send(finished)
                 elif data and data != "coord":
                     player_data = pickle.loads(data)
                     self.broadcast(data, client)
@@ -48,6 +54,7 @@ class Server:
 
             thread = threading.Thread(target=self.handle_client, args=(client,))
             thread.start()
+
 
 server = Server()
 server.run()

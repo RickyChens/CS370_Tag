@@ -7,7 +7,6 @@ import pygame_gui
 from constants import *
 from button import Button
 from Classes import Player, Obstacle, Modifier, Bot, Background
-from randomMap import generate_random_map
 from Raycasting import raycast
 from testing_sprite import getTile
 
@@ -27,22 +26,16 @@ light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
 obstacle_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 56, 80)
 modifier_img = getTile(sprite_sheet, 16, 16, 2.5, BLACK, 96, 144-16)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+hostname = socket.gethostname()
+ip_address = socket.gethostbyname(hostname)
 
 Clock = pygame.time.Clock()
 Manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
-# Define a function to draw the gradient circle around the player
-def draw_gradient_circle(screen, player_pos):
-    gradient_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-    max_radius = 50  # Maximum radius of the gradient circle
-    for radius in range(max_radius, 0, -1):
-        alpha = int(255 * (1 - radius / max_radius))  # Calculate alpha based on distance from max_radius
-        pygame.draw.circle(gradient_surface, (0, 0, 0, alpha), player_pos, radius)
-    screen.blit(gradient_surface, (0, 0))
 
 # Define the play function
 def play():
-    # Asking for Map
+    # Asking for Map4
     mapReq = pickle.dumps("map")
     s.send(mapReq)
     serialized_map = s.recv(1024)
@@ -188,7 +181,9 @@ def play():
         s.send(coordReq)
         message = s.recv(1024)
         enemy_coordinates = pickle.loads(message)
-        if enemy_coordinates == "waiting":
+        if enemy_coordinates == "game finished":
+          pass
+        elif enemy_coordinates == "waiting":
             print("Waiting")
         else:
             print(enemy_coordinates)
@@ -273,7 +268,7 @@ def play():
         screen.blit(bot_score_text, (WIDTH - 150, 10))
 
         # Game ending
-        if time_tracker / 60 >= 120: # If the time is more than 120 seconds
+        if time_tracker / 60 >= 5: # If the time is more than 120 seconds
             if player_score > bot_score:
                 winnerMenu("player")
             elif bot_score > player_score:
@@ -399,6 +394,27 @@ def connectionMenu():
 
         pygame.display.flip()
 
+
+def hostScreen():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    menu()
+
+        screen.blit(background, (0, 0))
+        ip_menu = pygame.font.Font("Assets/GlitchGoblin.ttf", 100).render(f"IP: {ip_address}", True, "#b68f40")
+        ip_rect = ip_menu.get_rect(center=(390, 100))
+        port_menu = pygame.font.Font("Assets/GlitchGoblin.ttf", 100).render(f"PORT: 5555", True, "#b68f40")
+        port_rect = port_menu.get_rect(center=(390, 200))
+        screen.blit(ip_menu, ip_rect)
+        screen.blit(port_menu, port_rect)
+
+        pygame.display.flip()
+
 def menu():
     while True:
         # Background and Title Text
@@ -407,7 +423,7 @@ def menu():
         menu_rect = tag_menu.get_rect(center=(390, 100))  # Center Text
         screen.blit(tag_menu, menu_rect)
 
-        start_button = Button(pygame.Surface([230, 80]), (390, 300), "Start",
+        host_button = Button(pygame.Surface([230, 80]), (390, 300), "Host",
                               pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
         quit_button = Button(pygame.Surface([230, 80]), (390, 600), "Quit",
                              pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
@@ -416,7 +432,7 @@ def menu():
         multiplayer_button = Button(pygame.Surface([460, 80]), (390, 500), "Multiplayer",
                                     pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
 
-        start_button.draw(screen)
+        host_button.draw(screen)
         quit_button.draw(screen)
         instructions_button.draw(screen)
         multiplayer_button.draw(screen)
@@ -431,8 +447,8 @@ def menu():
                     pygame.quit()
                     sys.exit()
             if event.type == pygame.MOUSEBUTTONUP:
-                if start_button.checkInput(pygame.mouse.get_pos()):
-                    play()
+                if host_button.checkInput(pygame.mouse.get_pos()):
+                    hostScreen()
             if event.type == pygame.MOUSEBUTTONUP:
                 if instructions_button.checkInput(pygame.mouse.get_pos()):
                     instructionsMenu()
