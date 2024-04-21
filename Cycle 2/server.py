@@ -1,7 +1,7 @@
 import socket
 import threading
 import pickle
-from randomMap import generate_random_map
+from randomMap import (generate_random_map)
 
 random_map = generate_random_map()
 serialized_map = pickle.dumps(random_map)
