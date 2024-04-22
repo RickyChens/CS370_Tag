@@ -1,11 +1,14 @@
+import pygame
 class Button:
     def __init__(self, image, pos, text_input, font):
         self.image = image
         self.pos = pos
+        # font = pygame.font.Font(None, 80)
         self.text = font.render(text_input, True, "white")
         self.rect = self.image.get_rect(center=pos)
         self.text_rect = self.text.get_rect(center=pos)
         self.pressed = False
+
 
     def draw(self, screen):
         if self.pressed:
@@ -18,3 +21,4 @@ class Button:
                                                                                           self.rect.bottom):
             self.pressed = not self.pressed  # Toggle the pressed attribute
             return True
+

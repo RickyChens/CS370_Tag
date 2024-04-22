@@ -14,12 +14,16 @@ from testing_sprite import getTile
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 screen_boundaries = pygame.Rect((0, 0), (WIDTH, HEIGHT))
-background = pygame.image.load("Assets/Background.png").convert_alpha()
+background = pygame.image.load("Assets/mainmenu.png").convert_alpha()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-instructions = pygame.image.load("Assets/instructions.webp").convert_alpha()
+instructions = pygame.image.load("Assets/OptionsMenu.png").convert_alpha()
 player_sheet = pygame.image.load('Assets/Dungeon_Character.png').convert_alpha()
 sprite_sheet = pygame.image.load('Assets/Dungeon_Tileset.png').convert_alpha()
 red_sprite_sheet = pygame.image.load('Assets/Dungeon_Tileset.png').convert_alpha()
+buttonSmall = pygame.image.load('Assets/buttonS.png').convert_alpha()
+buttonMedium = pygame.image.load('Assets/buttonM.png').convert_alpha()
+buttonLarge = pygame.image.load('Assets/buttonL.png').convert_alpha()
+multiplayerMenu = pygame.image.load('Assets/multiplayerMenu.png').convert_alpha()
 player_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 32)
 bot_image = getTile(player_sheet, 16, 16, 2.5, BLACK, 80, 48)
 light_tile = getTile(sprite_sheet, 16, 16, 10, BLACK, 32, 32)
@@ -344,10 +348,10 @@ def winnerMenu(winner):
         winner_rect = winner_text.get_rect(center=(390, 150))
         screen.blit(winner_text, winner_rect)
 
-        restart_button = Button(pygame.Surface([230, 80]), (390, 300), "Retry",
-                                pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-        menu_button = Button(pygame.Surface([230, 80]), (390, 400), "Menu",
-                             pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
+        restart_button = Button(buttonSmall, (390, 300), "Retry",
+                                pygame.font.Font("Assets/GlitchGoblin.ttf", 55))
+        menu_button = Button(buttonSmall, (390, 400), "Menu",
+                             pygame.font.Font("Assets/GlitchGoblin.ttf", 55))
 
         restart_button.draw(screen)
         menu_button.draw(screen)
@@ -383,9 +387,9 @@ def instructionsMenu():
 def connectionMenu():
     tag_menu = pygame.font.Font("Assets/GlitchGoblin.ttf", 100).render("Multiplayer", True, "#b68f40")
     menu_rect = tag_menu.get_rect(center=(390, 100))  # Center Text
-    ip_text = pygame.font.Font("Assets/GlitchGoblin.ttf", 50).render("IP", True, "#b68f40")
+    ip_text = pygame.font.Font("Assets/ADAM.CG PRO.otf", 50).render("IP", True, "white")
     ip_rect = tag_menu.get_rect(center=(425, 300))  # Center Text
-    port_text = pygame.font.Font("Assets/GlitchGoblin.ttf", 50).render("Port", True, "#b68f40")
+    port_text = pygame.font.Font("Assets/ADAM.CG PRO.otf", 50).render("Port", True, "white")
     port_rect = tag_menu.get_rect(center=(350, 400))  # Center Text
 
     ip_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((195, 250), (500, 50)),
@@ -394,8 +398,8 @@ def connectionMenu():
                                                      manager=Manager, object_id="#port_text")
 
     # Creation of Connect Button
-    connect_button = Button(pygame.Surface([320, 80]), (390, 500), "Connect",
-                            pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
+    connect_button = Button(buttonMedium, (390, 500), "Connect",
+                            pygame.font.Font("Assets/GlitchGoblin.ttf", 55))
 
     ip = ""
     port = "1"
@@ -430,7 +434,7 @@ def connectionMenu():
 
         Manager.update(UI_REFRESH_RATE)
 
-        screen.blit(background, (0, 0))
+        screen.blit(multiplayerMenu, (0, 0))
         connect_button.draw(screen)
         Manager.draw_ui(screen)
 
@@ -456,10 +460,10 @@ def hostScreen():
                 if event.key == pygame.K_ESCAPE:
                     menu()
 
-        screen.blit(background, (0, 0))
-        ip_menu = pygame.font.Font("Assets/GlitchGoblin.ttf", 100).render(f"IP: {ip_address}", True, "#b68f40")
+        screen.blit(multiplayerMenu, (0, 0))
+        ip_menu = pygame.font.Font("Assets/ADAM.CG PRO.otf", 55).render(f"IP: {ip_address}", True, "#b68f40")
         ip_rect = ip_menu.get_rect(center=(390, 100))
-        port_menu = pygame.font.Font("Assets/GlitchGoblin.ttf", 100).render(f"PORT: 5555", True, "#b68f40")
+        port_menu = pygame.font.Font("Assets/ADAM.CG PRO.otf", 55).render(f"PORT: 5555", True, "#b68f40")
         port_rect = port_menu.get_rect(center=(390, 200))
         screen.blit(ip_menu, ip_rect)
         screen.blit(port_menu, port_rect)
@@ -477,14 +481,14 @@ def menu():
         menu_rect = tag_menu.get_rect(center=(390, 100))  # Center Text
         screen.blit(tag_menu, menu_rect)
 
-        host_button = Button(pygame.Surface([230, 80]), (390, 300), "Host",
-                             pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-        quit_button = Button(pygame.Surface([230, 80]), (390, 600), "Quit",
-                             pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-        instructions_button = Button(pygame.Surface([460, 80]), (390, 400), "Instructions",
-                                     pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
-        multiplayer_button = Button(pygame.Surface([460, 80]), (390, 500), "Multiplayer",
-                                    pygame.font.Font("Assets/GlitchGoblin.ttf", 65))
+        host_button = Button(buttonSmall, (390, 300), "Host",
+                             pygame.font.Font("Assets/GlitchGoblin.ttf", 55))
+        quit_button = Button(buttonSmall, (390, 600), "Quit",
+                             pygame.font.Font("Assets/GlitchGoblin.ttf", 55))
+        instructions_button = Button(buttonLarge, (390, 400), "Instructions",
+                                     pygame.font.Font("Assets/GlitchGoblin.ttf", 55))
+        multiplayer_button = Button(buttonLarge, (390, 500), "Multiplayer",
+                                    pygame.font.Font("Assets/GlitchGoblin.ttf", 55))
 
         host_button.draw(screen)
         quit_button.draw(screen)
