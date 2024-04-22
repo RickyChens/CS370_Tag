@@ -15,7 +15,7 @@ from testing_sprite import getTile
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 screen_boundaries = pygame.Rect((0, 0), (WIDTH, HEIGHT))
-background = pygame.image.load("Assets/Background.png").convert_alpha()
+background = pygame.image.load("Assets/mainmenu.png").convert_alpha()
 background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 instructions = pygame.image.load("Assets/instructions.webp").convert_alpha()
 player_sheet = pygame.image.load('Assets/Dungeon_Character.png').convert_alpha()
