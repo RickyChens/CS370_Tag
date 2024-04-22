@@ -222,14 +222,15 @@ def play():
         s.send(coordReq)
         message = s.recv(1024)
         enemy_coordinates = pickle.loads(message)
-        if enemy_coordinates == "game finished":
+        if enemy_coordinates == "finished":
+            print("finished1")
             pass
         elif enemy_coordinates == "waiting":
             print("Waiting")
         else:
             print(enemy_coordinates)
             bot.rect.topleft = enemy_coordinates
-
+        print("finished2")
         # Bot Collision Detection with orb
         bot_modifier = ball.checkCircleCollision(ball, bot_group, obstacles)
         if bot_modifier == 1:
@@ -315,7 +316,7 @@ def play():
         screen.blit(bot_score_text, (WIDTH - 150, 10))
 
         # Game ending
-        if time_tracker / 60 >= 120:  # If the time is more than 120 seconds
+        if time_tracker / 60 >= 10:  # If the time is more than 120 seconds
             if player_score > bot_score:
                 winnerMenu("player")
             elif bot_score > player_score:
@@ -327,6 +328,8 @@ def play():
 
 
 def winnerMenu(winner):
+    finished = pickle.dumps("game finished")
+    s.send(finished)
     while True:
         screen.blit(background, (0, 0))
         if winner == "player":
