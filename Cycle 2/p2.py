@@ -309,18 +309,18 @@ def play():
         screen.blit(circle, (0, 0))
 
         font = pygame.font.Font(None, 36)
-        player_score_text = font.render(f'Player Score: {player_score}', True, RED)
-        bot_score_text = font.render(f'Bot Score: {bot_score}', True, RED)
+        player_score_text = font.render(f'Your Score: {player_score}', True, RED)
+        bot_score_text = font.render(f'Enemy Score: {bot_score}', True, RED)
         if player.getIsTagged():
-            tagged_text = font.render(f"Player is Tagged!", True, RED)
+            tagged_text = font.render(f"You are Tagged!", True, RED)
         else:
-            tagged_text = font.render(f"Bot is Tagged!", True, RED)
+            tagged_text = font.render(f"Enemy is Tagged!", True, RED)
         screen.blit(tagged_text, (10, 50))
         screen.blit(player_score_text, (10, 10))
-        screen.blit(bot_score_text, (WIDTH - 150, 10))
+        screen.blit(bot_score_text, (WIDTH - 195, 10))
 
         # Game ending
-        if time_tracker / 60 >= 10:  # If the time is more than 120 seconds
+        if time_tracker / 60 >= 30:  # If the time is more than 120 seconds
             if player_score > bot_score:
                 winnerMenu("player")
             elif bot_score > player_score:

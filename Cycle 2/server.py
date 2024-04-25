@@ -10,7 +10,7 @@ hostname = socket.gethostname()
 ip_address = socket.gethostbyname(hostname)
 
 class Server:
-    def __init__(self, host=ip_address, port=6666):
+    def __init__(self, host=ip_address, port=5555):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind((host, port))
         self.server.listen()
