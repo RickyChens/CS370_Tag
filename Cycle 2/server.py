@@ -28,19 +28,19 @@ class Server:
                 data = client.recv(1024)
                 serialized_data = pickle.loads(data)
                 if serialized_data == "game finished":
-                    print("finished")
+                    # print("finished")
                     finished = pickle.dumps("finished")
                     self.broadcast(finished, client)
                 elif serialized_data == "coord":
-                    print("empty")
+                    print("hi")
                 elif serialized_data == "map":
-                    print("sending map")
+                    # print("sending map")
                     client.send(serialized_map)
-                    print("finished sending map")
+                    # ("finished sending map")
                 elif data and data != "coord":
                     player_data = pickle.loads(data)
                     self.broadcast(data, client)
-                    print(player_data)
+                    # print(player_data)
 
             except Exception as e:
                 print(f"Error: {e}")
