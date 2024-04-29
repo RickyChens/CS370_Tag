@@ -33,9 +33,11 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 hostname = socket.gethostname()
 ip_address = socket.gethostbyname(hostname)
 
+# UI Boilerplate
 Clock = pygame.time.Clock()
 Manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
+# Loading menu sounds
 pygame.mixer.music.load("Assets/Startmusic.wav")
 pygame.mixer.music.play(-1)  # -1 means play on loop
 pygame.mixer.music.set_volume(0.25)  # Set initial music volume
@@ -177,6 +179,7 @@ def play():
 
     clock = pygame.time.Clock()
 
+    # Player input checks
     running = True
     while running:
         for event in pygame.event.get():
@@ -202,11 +205,13 @@ def play():
             elif event.type == pygame.USEREVENT + 1:
                 bot.resetSpeed()
 
+        # Moving flashlight
         if turn_left:
             flashlight_angle -= 5  # Decrease flashlight angle
         if turn_right:
             flashlight_angle += 5  # Increase flashlight angle
 
+        # Moves players based on keyboard input
         dx = 5 + player.speed_modifier
         dy = 5 + player.speed_modifier
         keys = pygame.key.get_pressed()
@@ -219,6 +224,8 @@ def play():
         if keys[pygame.K_s]:
             player.move(0, dy, obstacles, player_group)
 
+
+        # Multiplayer Server Data
         coordinates = pickle.dumps((player.rect.x, player.rect.y))
         s.send(coordinates)
 
@@ -227,14 +234,14 @@ def play():
         message = s.recv(1024)
         enemy_coordinates = pickle.loads(message)
         if enemy_coordinates == "finished":
-            print("finished1")
+            # print("finished1")
             pass
         elif enemy_coordinates == "waiting":
             print("Waiting")
         else:
-            print(enemy_coordinates)
+            # print(enemy_coordinates)
             bot.rect.topleft = enemy_coordinates
-        print("finished2")
+        # print("finished2")
         # Bot Collision Detection with orb
         bot_modifier = ball.checkCircleCollision(ball, bot_group, obstacles)
         if bot_modifier == 1:
@@ -255,7 +262,7 @@ def play():
 
         # Player bot collision detection
         if pygame.sprite.spritecollide(bot, player_group, False, pygame.sprite.collide_mask):
-            print("Collided")
+            # ("Collided")
             if player.getIsTagged() and tag_cooldown <= 0:
                 tagged_time = 0
                 tag_cooldown = 3
@@ -302,25 +309,27 @@ def play():
             screen.blit(bot.image, bot.rect)
         screen.blit(player.image, player.rect)
 
+        # Creating circles to show a limited view
         circle = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
         circle_center = (player.rect.x + player.rect.width // 2, player.rect.y + player.rect.height // 2)
         pygame.draw.circle(circle, (0, 0, 0, 230), circle_center, 2000, 1848)
         screen.blit(circle_surface, (player.rect.x - 143, player.rect.y - 143))
         screen.blit(circle, (0, 0))
 
+        # Generate who is tagged text
         font = pygame.font.Font(None, 36)
-        player_score_text = font.render(f'Player Score: {player_score}', True, RED)
-        bot_score_text = font.render(f'Bot Score: {bot_score}', True, RED)
+        player_score_text = font.render(f'Your Score: {player_score}', True, RED)
+        bot_score_text = font.render(f'Enemy Score: {bot_score}', True, RED)
         if player.getIsTagged():
-            tagged_text = font.render(f"Player is Tagged!", True, RED)
+            tagged_text = font.render(f"You are Tagged!", True, RED)
         else:
-            tagged_text = font.render(f"Bot is Tagged!", True, RED)
+            tagged_text = font.render(f"Enemy is Tagged!", True, RED)
         screen.blit(tagged_text, (10, 50))
         screen.blit(player_score_text, (10, 10))
         screen.blit(bot_score_text, (WIDTH - 150, 10))
 
         # Game ending
-        if time_tracker / 60 >= 10:  # If the time is more than 120 seconds
+        if time_tracker / 60 >= 120:  # If the time is more than 120 seconds
             if player_score > bot_score:
                 winnerMenu("player")
             elif bot_score > player_score:
